@@ -6,9 +6,6 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 import 'package:jingle_street/config/functions/provider.dart';
 import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
-import 'package:jingle_street/view/auth_screen/otp_screen.dart';
-import 'package:jingle_street/view/customer_screen/customer_profile_edit_screen.dart';
-import 'package:jingle_street/view/vendor_screen/vendor_profile_edit_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
