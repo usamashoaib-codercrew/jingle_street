@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "680567986743",
+    "project_id": "jingleestreet",
+    "storage_bucket": "jingleestreet.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:680567986743:android:733aa5800b5b90409bbdb2",
+        "android_client_info": {
+          "package_name": "com.example.JingleeStreet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "680567986743-otndjee7ink2rvc5srpn64bilt6dqakk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.JingleeStreet",
+            "certificate_hash": "85b34ba023cc56857a5133baedbec9416735245e"
+          }
+        },
+        {
+          "client_id": "680567986743-n5pm5p5dqgg8hc2esi0ckla4ih943pkb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC00uEwDe_XTWllLztrq23JpAWeoPs4YQo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "680567986743-n5pm5p5dqgg8hc2esi0ckla4ih943pkb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

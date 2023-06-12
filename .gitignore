@@ -1,0 +1,6 @@
+build/
+*.bin/
+.d/
+.lock/
+.stamp/
+*.bin
