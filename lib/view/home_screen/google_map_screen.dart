@@ -207,6 +207,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     final circleSize = screenHeight > screenWidth ? screenWidth : screenHeight;
     final customHeightSize = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
+        
     return hasInternet
         ? Scaffold(
       key: _scaffoldKey,
