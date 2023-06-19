@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
-import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:percent_indicator/percent_indicator.dart';

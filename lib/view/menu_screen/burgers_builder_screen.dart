@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jingle_street/config/functions/navigator_functions.dart';
 import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import 'package:jingle_street/view/buy_screen/add_to_card_screen.dart';
 import 'package:jingle_street/view/menu_screen/detail_edit_screen.dart';
-import 'package:jingle_street/view/vendor_screen/add_items_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
 
@@ -45,17 +43,17 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ProductEditScreen(
-                                catagory: "${widget.itemData[i]["name"]}"
-                                    .toCapitalize(),
-                                name: "${widget.itemData[i]["name"]}"
-                                    .toCapitalize(),
-                                price: "${widget.itemData[i]["price"]}",
-                                ingredients:
-                                    "${widget.itemData[i]["description"]}",
-                                img: widget.itemData[i]["images"],
-                                size: size,
-                                itemId: widget.itemData[i]["id"],
-                                v_type: widget.vType,
+                              catagory: "${widget.itemData[i]["name"]}"
+                                  .toCapitalize(),
+                              name: "${widget.itemData[i]["name"]}"
+                                  .toCapitalize(),
+                              price: "${widget.itemData[i]["price"]}",
+                              ingredients:
+                                  "${widget.itemData[i]["description"]}",
+                              img: widget.itemData[i]["images"],
+                              size: size,
+                              itemId: widget.itemData[i]["id"],
+                              v_type: widget.vType,
                             ),
                           ));
                     }
@@ -101,7 +99,8 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
                                         child: FadeInImage.assetNetwork(
                                           placeholder:
                                               "assets/images/loader.gif",
-                                          image: "${widget.itemData[i]["images"][0]["url"]}",
+                                          image:
+                                              "${widget.itemData[i]["images"][0]["url"]}",
                                           fit: BoxFit.cover,
                                           placeholderErrorBuilder:
                                               (context, error, stackTrace) {
@@ -169,7 +168,9 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
                                   : InkWell(
                                       onTap: () {
                                         //add code for add to cart items
-                                        Provider.of<CartCounter>(context, listen: false).increment();
+                                        Provider.of<CartCounter>(context,
+                                                listen: false)
+                                            .increment();
                                       },
                                       child: CircleAvatar(
                                         radius: 8,

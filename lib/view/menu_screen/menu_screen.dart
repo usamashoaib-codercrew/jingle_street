@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
@@ -107,9 +105,6 @@ class _VandorScreenState extends State<VandorScreen> {
   Widget build(BuildContext context) {
     print("vtype..${widget.vType}");
     bool myBoolean = Provider.of<BoolProvider>(context).myBoolean;
-    final widthScreen = MediaQuery.of(context).size.width;
-
-    final heightScreen = MediaQuery.of(context).size.height;
     var size = MediaQuery.of(context).size;
 
     if (myBoolean) {

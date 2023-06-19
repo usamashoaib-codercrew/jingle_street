@@ -30,7 +30,6 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textScalingFactor = MediaQuery.of(context).textScaleFactor;
     final widthScreen = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: AppTheme.appColor,
