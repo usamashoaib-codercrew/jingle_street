@@ -68,6 +68,7 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
                               catagoryPrice: widget.itemData[i]['price'],
                               catagoryImages: widget.itemData[i]['images'],
                               length: widget.itemData[i]['images'].length,
+                              id: widget.itemData[i]["id"],
                             ),
                           ));
                     },
