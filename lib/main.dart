@@ -9,6 +9,7 @@ import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
+import 'providers/total_counter_provider.dart';
 import 'view/startup_screen/splash_screen.dart';
 
 void main() async {
@@ -50,7 +51,7 @@ runApp(
     providers: [
       ChangeNotifierProvider<BoolProvider>(create: (_) => BoolProvider()),
       ChangeNotifierProvider<CartCounter>(create: (_) => CartCounter()),
-      // ChangeNotifierProvider<GetVendorProductsProvider>(create: (_) => GetVendorProductsProvider()),
+      ChangeNotifierProvider<TotalCounterProvider>(create: (_) => TotalCounterProvider()),
     ],
     child: MyApp(),
   ),

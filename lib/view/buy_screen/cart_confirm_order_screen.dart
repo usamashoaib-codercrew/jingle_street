@@ -1,45 +1,89 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:jingle_street/config/functions/navigator_functions.dart';
+import 'package:jingle_street/providers/total_counter_provider.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/app_button.dart';
 import 'package:jingle_street/resources/widgets/fields/app_fields.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartConfirmOrderScreen extends StatefulWidget {
+  final int? price;
+  const CartConfirmOrderScreen({
+    super.key,
+     this.price,
+  });
   @override
   State<CartConfirmOrderScreen> createState() => _CartConfirmOrderScreenState();
 }
 
 class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
+  List<Map<String, dynamic>> itemsListGet = [];
   TextEditingController _orderController = TextEditingController();
-  List getSaveData = [];
-  int addCount = 1;
-  int minusCount = 1;
-  num totalPrice = 0;
 
   @override
   void initState() {
-    // TODO: implement initState
-    loadData();
+    _loadItemsData();
+    super.initState();
   }
+
+  Future<void> _loadItemsData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? jsonString = prefs.getString('myItemsList');
+    if (jsonString != null) {
+      List<dynamic> decodedList = jsonDecode(jsonString);
+      itemsListGet = decodedList.cast<Map<String, dynamic>>();
+    }
+    setState(() {});
+  }
+
+  void removeItemFromSharedPreferences(int listIndex) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<dynamic> decodedList = [];
+    String? jsonString = prefs.getString('myItemsList');
+    if (jsonString != null) {
+      decodedList = jsonDecode(jsonString);
+      if (listIndex >= 0 && listIndex < decodedList.length) {
+        decodedList.removeAt(listIndex);
+        jsonString = jsonEncode(decodedList);
+        await prefs.setString('myItemsList', jsonString);
+        setState(() {});
+      }
+    }
+  }
+
+  //testing code for increment
+  Future<void> addToCartItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = jsonEncode(itemsListGet);
+    await prefs.setString('myItemsList', jsonString);
+  }
+  //end
 
   @override
   Widget build(BuildContext context) {
+    final totalCounterProvider =
+        Provider.of<TotalCounterProvider>(context, listen: false);
     var size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppTheme.appColor,
-        appBar: SimpleAppBar(
-            text: "Cart",
-            onTap: () {
-              pop(context);
-            }),
+        appBar: AppBar(
+          leadingWidth: 50,
+    title: AppText(
+      "Cart",
+      bold: FontWeight.bold,
+      color: AppTheme.appColor,
+      size: 24,
+    ),
+    centerTitle: true,
+    backgroundColor: Colors.white,
+    elevation: 0,
+        ),
         body: Center(
           child: Container(
             height: size.height * 0.82,
@@ -56,7 +100,7 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppText(
-                      "${getSaveData.length} items in cart",
+                      "${itemsListGet.length} items in cart",
                       bold: FontWeight.bold,
                       size: 20,
                       color: AppTheme.appColor,
@@ -67,12 +111,19 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                     ListView.builder(
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: getSaveData.length,
+                      itemCount: itemsListGet.length,
                       itemBuilder: (context, index) {
+                        int totalCount = 0;
+                        for (int i = 0; i < itemsListGet.length; i++) {
+                          int price = itemsListGet[i]['itemPrice'];
+                          totalCount += price;
+                        }
+
+                        print("Total count: $totalCount");
+                        totalCounterProvider.updateTotalCount(totalCount);
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10.0),
                           child: Container(
-                            height: 80,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -90,7 +141,7 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                                         ),
                                         child: Image(
                                             image: NetworkImage(
-                                                "${getSaveData[index]["image"]}"),
+                                                "${itemsListGet[index]["itemPicture"]}"),
                                             filterQuality: FilterQuality.high,
                                             fit: BoxFit.scaleDown)),
                                     SizeBoxWidth16(),
@@ -101,7 +152,7 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         AppText(
-                                          "${getSaveData[index]["category"]}",
+                                          "${itemsListGet[index]["itemName"]}",
                                           size: 18,
                                           color: AppTheme.appColor,
                                           bold: FontWeight.w700,
@@ -110,7 +161,7 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                                           height: 5,
                                         ),
                                         AppText(
-                                          "${getSaveData[index]["price"]}",
+                                          "${itemsListGet[index]["itemPrice"]}",
                                           size: 14,
                                           color: AppTheme.yellowColor,
                                         ),
@@ -120,7 +171,29 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                                         Row(
                                           children: [
                                             InkWell(
-                                              onTap: () {},
+                                              onTap: () {
+                                                if (itemsListGet[index]
+                                                        ['counterValue'] ==
+                                                    1) {
+                                                  return;
+                                                }
+                                                setState(() {
+                                                  itemsListGet[index]
+                                                      ['counterValue']--;
+                                                  int price =
+                                                      itemsListGet[index]
+                                                          ['itemPrice'];
+                                                  int updatedPrice =
+                                                      price - widget.price!;
+                                                  itemsListGet[index]
+                                                          ['itemPrice'] =
+                                                      updatedPrice;
+                                                  print(
+                                                      "calculating_price minus ${itemsListGet[index]['itemPrice']}");
+                                                  addToCartItems();
+                                                  // _loadItemsData();
+                                                });
+                                              },
                                               child: Container(
                                                 width: 18,
                                                 height: 18,
@@ -145,12 +218,30 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                                               width: 10,
                                             ),
                                             AppText(
-                                              "${addCount}",
+                                              "${itemsListGet[index]["counterValue"]}",
                                               color: AppTheme.appColor,
                                             ),
                                             SizedBox(width: 10),
                                             InkWell(
-                                              onTap: () {},
+                                              onTap: () {
+                                                setState(() {
+                                                  itemsListGet[index]
+                                                      ['counterValue']++;
+                                                  int price =
+                                                      itemsListGet[index]
+                                                          ['itemPrice'];
+                                                  int updatedPrice =
+                                                      price + widget.price!;
+                                                  itemsListGet[index]
+                                                          ['itemPrice'] =
+                                                      updatedPrice;
+                                                  print(
+                                                      "calculating_price ${itemsListGet[index]['itemPrice']}");
+
+                                                  addToCartItems();
+                                                  // _loadItemsData();
+                                                });
+                                              },
                                               child: Container(
                                                 width: 18,
                                                 height: 18,
@@ -177,32 +268,29 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                                     )
                                   ],
                                 ),
-                                IconButton(
-                                    onPressed: () {
-                                      totalPrice = totalPrice -
-                                          getSaveData[index]["price"];
-                                      print("ii$index");
-                                      clearData(index);
-                                      getSaveData.removeAt(index);
-
-                                      print("ii${getSaveData}");
-                                      setState(() {});
-                                    },
-                                    icon: Container(
-                                        height: 25,
-                                        width: 25,
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(100),
-                                            border: Border.all(
-                                              width: 2,
-                                              color: AppTheme.appColor,
-                                            )),
+                                Container(
+                                  // color: Colors.black,
+                                  height: 75,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            itemsListGet.removeAt(index);
+                                            removeItemFromSharedPreferences(
+                                                index);
+                                          });
+                                        },
                                         child: Icon(
-                                          Icons.close,
+                                          Icons.cancel_outlined,
+                                          size: 25,
                                           color: AppTheme.appColor,
-                                          size: 15,
-                                        ))),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -232,45 +320,51 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
                     SizedBox(
                       height: 15,
                     ),
-                    RowText(
-                        text: "Total",
-                        color: AppTheme.appColor,
-                        fontsize: 20.0,
-                        fontweight: FontWeight.bold,
-                        text1: "${totalPrice}",
-                        color1: AppTheme.appColor,
-                        fontsize1: 20.0),
+                    Consumer<TotalCounterProvider>(
+                        builder: (context, totalCounterProvider, _) {
+                      return RowText(
+                          text: "Total",
+                          color: AppTheme.appColor,
+                          fontsize: 20.0,
+                          fontweight: FontWeight.bold,
+                          text1: itemsListGet.length == 0
+                              ? '0'
+                              : "\$${totalCounterProvider.totalCount.toStringAsFixed(1)}",
+                          color1: AppTheme.appColor,
+                          fontsize1: 20.0);
+                    }),
                     SizedBox(
                       height: 5,
                     ),
-                    RowText(
-                        text: "Delivary Charges",
-                        color: AppTheme.appColor,
-                        fontsize: 17.0,
-                        text1: "\$5",
-                        color1: AppTheme.appColor,
-                        fontsize1: 20.0),
+                    Consumer<TotalCounterProvider>(
+                        builder: (context, totalCounterProvider, _) {
+                      return RowText(
+                          text: "Sales Tax",
+                          color: AppTheme.appColor,
+                          fontsize: 20.0,
+                          fontweight: FontWeight.bold,
+                          text1: itemsListGet.length == 0
+                              ? '0'
+                              : "\$${((totalCounterProvider.totalCount * 0.16)).toStringAsFixed(1)} ",
+                          color1: AppTheme.appColor,
+                          fontsize1: 20.0);
+                    }),
                     SizedBox(
                       height: 5,
                     ),
-                    RowText(
-                        text: "Sales Tax",
-                        color: AppTheme.appColor,
-                        fontsize: 17.0,
-                        text1: "\$4",
-                        color1: AppTheme.appColor,
-                        fontsize1: 20.0),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    RowText(
-                        text: "Grand Total",
-                        color: AppTheme.appColor,
-                        fontsize: 20.0,
-                        fontweight: FontWeight.bold,
-                        text1: "\$50",
-                        color1: AppTheme.appColor,
-                        fontsize1: 20.0),
+                    Consumer<TotalCounterProvider>(
+                        builder: (context, totalCounterProvider, _) {
+                      return RowText(
+                          text: "Grand Total",
+                          color: AppTheme.appColor,
+                          fontsize: 20.0,
+                          fontweight: FontWeight.bold,
+                          text1: itemsListGet.length == 0
+                              ? '0'
+                              : "\$${((totalCounterProvider.totalCount) + ((totalCounterProvider.totalCount) * 0.16)).toStringAsFixed(1)}",
+                          color1: AppTheme.appColor,
+                          fontsize1: 20.0);
+                    }),
                     SizedBox(
                       height: 30,
                     ),
@@ -293,61 +387,4 @@ class _CartConfirmOrderScreenState extends State<CartConfirmOrderScreen> {
       ),
     );
   }
-
-  ///////////////////////// clear data //////////////////////
-
-  clearData(index) async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-
-    final jsonString = preferences.getString("setData");
-    List<Map<String, dynamic>> savedData = jsonString != null
-        ? List<Map<String, dynamic>>.from(jsonDecode(jsonString))
-        : [];
-
-    // Remove the category at the specified index
-    if (index >= 0 && index < savedData.length) {
-      savedData.removeAt(index);
-    }
-    final updatedJsonString = jsonEncode(savedData);
-    await preferences.setString("setData", updatedJsonString);
-
-    // print("Data saved: $updatedJsonString");
-  }
-
-///////////////////////////////////   getting data ///////////////////////////
-  getData() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-
-    final data = preferences.getString("setData");
-
-    if (data != null) {
-      final decodedData = jsonDecode(data);
-      getSaveData = decodedData;
-      // print("null ${getSaveData}");
-
-      setState(() {});
-    } else {}
-  }
-
-  getTotal() {
-    //  print("145${getSaveData}");
-
-    for (var i = 0; i < getSaveData.length; i++) {
-      print("145${getSaveData[i]["price"]}");
-
-      num price = getSaveData[i]["price"];
-      print("198$price");
-      totalPrice += price;
-      ;
-    }
-    print("124$totalPrice");
-    setState(() {});
-  }
-
-  loadData() async {
-    await getData();
-    getTotal();
-  }
-
-  /////////////////////// add counter ///////////////////
 }

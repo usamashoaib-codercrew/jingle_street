@@ -21,7 +21,11 @@ import 'package:jingle_street/view/menu_screen/sauces_builder_screen.dart';
 import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
+import '../../config/variables/global_variables.dart';
+import '../buy_screen/cart_confirm_order_screen.dart';
 
 List isRated = List.generate(36, (index) => 1, growable: true);
 
@@ -92,7 +96,7 @@ class _VandorScreenState extends State<VandorScreen> {
   @override
   void initState() {
     dio = AppDio(context);
-
+    getCounter();
     Logger.init();
     super.initState();
     _futureGetItems = getVendorItems();
@@ -116,18 +120,26 @@ class _VandorScreenState extends State<VandorScreen> {
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
           actions: [
-            Consumer<CartCounter>(
-              builder: (context, cartCounter, _) => Stack(
+            Stack(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Icon(
-                      Icons.shopping_cart_outlined,
-                      color: AppTheme.appColor,
-                      size: 30,
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CartConfirmOrderScreen(),
+                          ));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Icon(
+                        Icons.shopping_cart_outlined,
+                        color: AppTheme.appColor,
+                        size: 30,
+                      ),
                     ),
                   ),
-                  if (cartCounter.itemCount > 0)
+                  if (Globals.counter > 0)
                     Positioned(
                       right: 5,
                       top: 4,
@@ -142,7 +154,7 @@ class _VandorScreenState extends State<VandorScreen> {
                           minHeight: 16,
                         ),
                         child: Text(
-                          cartCounter.itemCount.toString(),
+                          Globals.counter.toString(),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -153,7 +165,7 @@ class _VandorScreenState extends State<VandorScreen> {
                     ),
                 ],
               ),
-            ),
+            
             SizedBox(width: 20),
           ],
           centerTitle: true,
@@ -523,7 +535,6 @@ class _VandorScreenState extends State<VandorScreen> {
                     ),
                   ),
                   SizeBoxHeight10(),
-                  
                   StreamBuilder<List<dynamic>>(
                     stream: _futureGetItems,
                     builder: (context, snapshot) {
@@ -812,5 +823,17 @@ class _VandorScreenState extends State<VandorScreen> {
         },
       );
     }
+  }
+
+  setCounter() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    preferences.setInt("cartCounter", Globals.counter);
+  }
+
+  getCounter() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Globals.counter = preferences.getInt("cartCounter") as int;
+    setState(() {});
   }
 }

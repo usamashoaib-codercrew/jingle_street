@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jingle_street/config/variables/global_variables.dart';
+import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/app_button.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
@@ -9,6 +11,7 @@ import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
 import 'package:jingle_street/view/buy_screen/cart_confirm_order_screen.dart';
 import 'package:jingle_street/view/menu_screen/video_player_screen.dart';
 import 'package:page_view_indicators/circle_page_indicator.dart';
+import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,7 +21,7 @@ class AddToCardScreen extends StatefulWidget {
   final catagoryPrice;
   final catagoryImages;
   final length;
-  final id;
+  final itemId;
 
   const AddToCardScreen(
       {super.key,
@@ -26,8 +29,8 @@ class AddToCardScreen extends StatefulWidget {
       this.catagoryPrice,
       this.catagoryDiscrption,
       this.catagoryImages,
-      this.length, 
-      this.id});
+      this.length,
+      this.itemId});
 
   @override
   State<AddToCardScreen> createState() => _AddToCardScreenState();
@@ -35,22 +38,147 @@ class AddToCardScreen extends StatefulWidget {
 
 class _AddToCardScreenState extends State<AddToCardScreen> {
   final _pageIndexNotifier = ValueNotifier<int>(0);
-  // const BeefScreen({super.key});
 
-  List saveMultiple = [];
+  bool _alreadyAddedItems = false;
+
+  List<Map<String, dynamic>> itemsList = [];
+  // List<Map<String, dynamic>> itemsMergedList = [];
+
+  
+
+  Future<void> addToCartItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = jsonEncode(itemsList);
+    await prefs.setString('myItemsList', jsonString);
+  }
+
+  void _addItemToList() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('myItemsList');
+    itemsList = jsonString != null
+        ? List<Map<String, dynamic>>.from(jsonDecode(jsonString))
+        : [];
+    // Add a new map item to the list
+    Map<String, dynamic> newItem = {
+      'itemPicture': widget.catagoryImages[0]['url'],
+      'itemName': widget.catagoryName,
+      'itemPrice': widget.catagoryPrice,
+      'itemId': widget.itemId,
+      'counterValue': Globals.counterValue,
+    };
+
+    int itemIndex = itemsList
+        .indexWhere((element) => element['itemId'] == newItem['itemId']);
+    if (itemIndex != -1) {
+      setState(() {
+        itemsList[itemIndex]['counterValue']++; // Increment the count by 1
+        int price = itemsList[itemIndex]['itemPrice'];
+        num updatedPrice = price + widget.catagoryPrice;
+        itemsList[itemIndex]['itemPrice'] = updatedPrice;
+      });
+    } else {
+      itemsList.add(newItem);
+    }
+    String updateJsonString = jsonEncode(itemsList);
+    await prefs.setString('myItemsList', updateJsonString);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getCounter();
+  }
 
   @override
   Widget build(BuildContext context) {
-    print("lckbckba ${widget.id}");
-    print("${widget.catagoryImages}bbannnsdfkslldfbsdkbfxkkfbkdxbskbjdfb");
+    // print("lckbckba ${widget.getData}");
+    print("${widget.itemId}bbannnsdfkslldfbsdkbfxkkfbkdxbskbjdfb");
+    print("setting_items_pic ${widget.catagoryImages[0]['url']}");
+    print("setting_items_name ${widget.catagoryName}");
+    print("setting_items_price ${widget.catagoryPrice}");
     var size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppTheme.appColor,
-      appBar: SimpleAppBar(
-          text: "${widget.catagoryName}".toCapitalize(),
-          onTap: () {
-            Navigator.pop(context);
-          }),
+      appBar: AppBar(
+          actions: [
+            Stack(
+              children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CartConfirmOrderScreen(),
+                        ));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Icon(
+                      Icons.shopping_cart_outlined,
+                      color: AppTheme.appColor,
+                      size: 30,
+                    ),
+                  ),
+                ),
+                if (Globals.counter > 0)
+                  Positioned(
+                    right: 5,
+                    top: 4,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        Globals.counter.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            SizedBox(width: 20),
+          ],
+          centerTitle: true,
+          backgroundColor: AppTheme.whiteColor,
+          elevation: 0,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 20),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: CircleAvatar(
+                radius: 17,
+                backgroundColor: AppTheme.appColor,
+                child: Center(
+                  child: Icon(
+                    Icons.chevron_left,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          title: Align(
+            alignment: Alignment.center,
+            child: AppText(
+              "${widget.catagoryName}",
+              color: AppTheme.appColor,
+              size: 22,
+              bold: FontWeight.bold,
+            ),
+          )),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
@@ -165,89 +293,101 @@ class _AddToCardScreenState extends State<AddToCardScreen> {
             Container(
               height: size.height * 0.65,
               width: size.width,
+              // color: WhiteColor,
               decoration: BoxDecoration(color: AppTheme.whiteColor),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 20.0, left: 25, right: 25),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 35,
-                          width: 90,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: AppTheme.appColor),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.star,
-                                  size: 16,
-                                  color: AppTheme.yellowColor,
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                AppText(
-                                  "4.8",
-                                  size: 17,
-                                )
-                              ],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20, left: 25),
+                        child: InkWell(
+                          onTap: () {},
+                          child: Container(
+                            height: 35,
+                            width: 90,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: AppTheme.appColor),
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  InkWell(
+                                      onTap: () {},
+                                      child: Icon(
+                                        Icons.star,
+                                        size: 16,
+                                        color: AppTheme.yellowColor,
+                                      )),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  AppText(
+                                    "4.8",
+                                    size: 17,
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        Spacer(),
-                        AppText(
+                      ),
+                      Spacer(),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20, right: 25),
+                        child: AppText(
                           "\$${widget.catagoryPrice}",
                           color: AppTheme.yellowColor,
                         ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    AppText(
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25),
+                    child: AppText(
                       "${widget.catagoryName}".toCapitalize(),
-                      size: 28,
+                      size: 25,
                       bold: FontWeight.bold,
                       color: AppTheme.appColor,
                     ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    // SizedBox(height: 7,),
-                    AppText(
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  // SizedBox(height: 7,),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25),
+                    child: AppText(
                       "${widget.catagoryDiscrption}",
                       size: 16,
                       color: AppTheme.appColor,
                     ),
-                    SizedBox(
-                      height: 155,
-                    ),
-                    Center(
-                        child: AppButton(
-                      btnColor: AppTheme.appColor,
-                      text: "Add to Cart",
-                      textSize: 14,
-                      width: size.width * 0.3,
-                      textColor: AppTheme.whiteColor,
-                      onPressed: () {
-                        print("ok");
-                        saveData();
-
-                        Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) => CartConfirmOrderScreen(),
-                            ));
-                      },
-                    )),
-                  ],
-                ),
+                  ),
+                  SizedBox(
+                    height: 25,
+                  ),
+                  Spacer(),
+                  Center(
+                      child: AppButton(
+                    btnColor: AppTheme.appColor,
+                    text: "Add to Cart",
+                    textSize: 14,
+                    width: size.width * 0.3,
+                    textColor: AppTheme.whiteColor,
+                    onPressed: () {
+                      Globals.counter++;
+                      setCounter();
+                      _addItemToList();
+                    },
+                  )),
+                  Spacer(),
+                ],
               ),
             )
           ],
@@ -255,25 +395,16 @@ class _AddToCardScreenState extends State<AddToCardScreen> {
       ),
     );
   }
-saveData() async {
-  SharedPreferences preferences = await SharedPreferences.getInstance();
 
-  // Retrieve existing data from shared preferences
-  final jsonString = preferences.getString("setData");
-  List<Map<String, dynamic>> savedData = jsonString != null
-      ? List<Map<String, dynamic>>.from(jsonDecode(jsonString))
-      : [];
-  Map<String, dynamic> saveCategoryData = {
-    "category": widget.catagoryName,
-    "price": widget.catagoryPrice,
-    "image": widget.catagoryImages[0]["url"],
-  };
-  savedData.add(saveCategoryData);
+  setCounter() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
 
-  // Save the updated list to shared preferences
-  final updatedJsonString = jsonEncode(savedData);
-  await preferences.setString("setData", updatedJsonString);
+    preferences.setInt("cartCounter", Globals.counter);
+  }
 
-  print("Data saved: $updatedJsonString");
-}
+  getCounter() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Globals.counter = preferences.getInt("cartCounter") as int;
+    setState(() {});
+  }
 }

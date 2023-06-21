@@ -69,6 +69,8 @@ class _FriesBuilderState extends State<FriesBuilder> {
                               catagoryPrice: widget.itemData[i]['price'],
                               catagoryImages: widget.itemData[i]['images'],
                               length: widget.itemData[i]['images'].length,
+                              itemId: widget.itemData[i]["id"],
+
                             ),
                           ));
                     },

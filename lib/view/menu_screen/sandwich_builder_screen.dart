@@ -68,6 +68,8 @@ class _SandwichBuilderState extends State<SandwichBuilder> {
                               catagoryPrice: widget.itemData[i]['price'],
                               catagoryImages: widget.itemData[i]['images'],
                               length: widget.itemData[i]['images'].length,
+                              itemId: widget.itemData[i]["id"],
+
                             ),
                           ));
                     },

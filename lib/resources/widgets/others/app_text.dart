@@ -243,7 +243,7 @@ Widget RowText(
     fontweight1,
     fontfamily1}) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       Text(
         text,
@@ -253,13 +253,22 @@ Widget RowText(
             fontWeight: fontweight,
             fontFamily: fontfamily),
       ),
-      Text(
-        text1,
-        style: TextStyle(
-            color: color1,
-            fontSize: fontsize1,
-            fontWeight: fontweight1,
-            fontFamily: fontfamily1),
+      Spacer(),
+      Container(
+        // color: Colors.amber,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              text1,
+              style: TextStyle(
+                  color: color1,
+                  fontSize: fontsize1,
+                  fontWeight: fontweight1,
+                  fontFamily: fontfamily1),
+            ),
+          ],
+        ),
       ),
     ],
   );
