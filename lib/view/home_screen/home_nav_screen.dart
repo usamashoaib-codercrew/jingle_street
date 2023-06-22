@@ -27,7 +27,6 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       iconData: [
         Icons.home,
         Icons.notifications_none,
-        Icons.shopping_cart_outlined,
         Icons.settings,
       ],
     );

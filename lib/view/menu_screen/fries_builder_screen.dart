@@ -4,6 +4,7 @@ import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
+import 'package:jingle_street/view/menu_screen/add_to_card_screen.dart';
 import 'package:jingle_street/view/menu_screen/detail_edit_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
@@ -57,7 +58,21 @@ class _FriesBuilderState extends State<FriesBuilder> {
                             ),
                           ));
                     }
-                  : () {},
+                  : () {
+                    Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddToCardScreen(
+                              catagoryName: widget.itemData[i]['name'],
+                              catagoryDiscrption: widget.itemData[i]
+                                  ['description'],
+                              catagoryPrice: widget.itemData[i]['price'],
+                              catagoryImages: widget.itemData[i]['images'],
+                              length: widget.itemData[i]['images'].length,
+                              itemId: widget.itemData[i]["id"],
+                            ),
+                          ));
+                  },
               child: Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -149,28 +164,7 @@ class _FriesBuilderState extends State<FriesBuilder> {
                                 color: AppTheme.ratingYellowColor,
                                 bold: FontWeight.bold,
                               ),
-                              widget.uType == 1
-                                  ? SizedBox()
-                                  : InkWell(
-                                      onTap: () {
-                                        //add to cart
-                                        Provider.of<CartCounter>(context,
-                                                listen: false)
-                                            .increment();
-                                      },
-                                      child: CircleAvatar(
-                                        radius: 8,
-                                        backgroundColor:
-                                            AppTheme.addButtonColor,
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.add,
-                                            color: Colors.white,
-                                            size: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    )
+                             
                             ],
                           )
                         ]),

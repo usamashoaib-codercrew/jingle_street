@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'add_to_card_screen.dart';
+
 class BurgerBuilder extends StatefulWidget {
   final itemData;
   final uType;
@@ -61,7 +63,21 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
                             ),
                           ));
                     }
-                  : () {},
+                  : () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddToCardScreen(
+                              catagoryName: widget.itemData[i]['name'],
+                              catagoryDiscrption: widget.itemData[i]
+                                  ['description'],
+                              catagoryPrice: widget.itemData[i]['price'],
+                              catagoryImages: widget.itemData[i]['images'],
+                              length: widget.itemData[i]['images'].length,
+                              itemId: widget.itemData[i]["id"],
+                            ),
+                          ));
+                    },
               child: Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -154,25 +170,6 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
                                 color: AppTheme.ratingYellowColor,
                                 bold: FontWeight.bold,
                               ),
-                              widget.uType == 1
-                                  ? SizedBox()
-                                  : InkWell(
-                                      onTap: () {
-                                        //add code for add to cart items
-                                      },
-                                      child: CircleAvatar(
-                                        radius: 8,
-                                        backgroundColor:
-                                            AppTheme.addButtonColor,
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.add,
-                                            color: Colors.white,
-                                            size: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    )
                             ],
                           )
                         ]),

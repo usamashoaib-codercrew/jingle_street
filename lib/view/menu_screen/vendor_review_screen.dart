@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
+import 'package:jingle_street/resources/widgets/fields/app_fields.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import 'package:maps_launcher/maps_launcher.dart';
@@ -17,6 +18,7 @@ class VendorReviewScreen extends StatefulWidget {
   final double lat;
   final double lon;
   final location;
+  final uType;
   const VendorReviewScreen(
       {super.key,
       required this.profileImage,
@@ -24,19 +26,157 @@ class VendorReviewScreen extends StatefulWidget {
       required this.vType,
       required this.lat,
       required this.lon,
-         required this.businessName,
-        this.location
-      });
+      required this.businessName,
+      this.location,
+      this.uType});
 
   @override
   State<VendorReviewScreen> createState() => _VendorReviewScreenState();
 }
+
+TextEditingController _commentsController = TextEditingController();
 
 class _VendorReviewScreenState extends State<VendorReviewScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      floatingActionButton: widget.uType == 0
+          ? Padding(
+            padding: const EdgeInsets.only(right:10.0),
+            child: FloatingActionButton(
+              
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          backgroundColor: AppTheme.appColor,
+                          content: Container(
+                            width: double.infinity,
+                            height: 420,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: SingleChildScrollView(
+                              
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  AppText(
+                                    "Tell us, how was our food?",
+                                    size: 22,
+                                    bold: FontWeight.w700,
+                                    color: AppTheme.whiteColor,
+                                  ),
+                                  Divider(
+                                      thickness: 2,
+                                      endIndent: 10,
+                                      indent: 10,
+                                      color: AppTheme.whiteColor),
+                                  SizeBoxHeight20(),
+                                  CircleAvatar(
+                                    backgroundColor: AppTheme.appColor,
+                                    radius: 40,
+                                    backgroundImage:
+                                        AssetImage('assets/images/Mcdonald.png'),
+                                  ),
+                                  SizeBoxHeight16(),
+                                  AppText(
+                                    "Ahsan khan",
+                                    size: 24,
+                                    bold: FontWeight.w700,
+                                    color: AppTheme.whiteColor,
+                                  ),
+                                  SizeBoxHeight20(),
+                                  AppText(
+                                    "Rate the care provided Tuesday, Feb 28",
+                                    size: 16,
+                                    bold: FontWeight.w400,
+                                    color: AppTheme.whiteColor,
+                                  ),
+                                  SizeBoxHeight5(),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.star, color: Colors.yellow),
+                                      Icon(Icons.star, color: Colors.yellow),
+                                      Icon(Icons.star, color: Colors.yellow),
+                                      Icon(Icons.star, color: Colors.white),
+                                      Icon(Icons.star, color: Colors.white),
+                                    ],
+                                  ),
+                                  SizeBoxHeight16(),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.whiteColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: AppField(
+                                      hintText: 'Additional Comments...',
+                                      textEditingController: _commentsController,
+                                      borderSideColor: AppTheme.whiteColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                      maxLines: 3,
+                                    ),
+                                  ),
+                                  SizeBoxHeight16(),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(2),
+                                          border: Border.all(
+                                            width: 1,
+                                            color: AppTheme.whiteColor,
+                                          ),
+                                        ),
+                                        width: 100,
+                                        height: 48,
+                                        child: Center(
+                                          child: AppText(
+                                            "Not Now",
+                                            size: 14,
+                                            bold: FontWeight.w700,
+                                            color: AppTheme.whiteColor,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.whiteColor,
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                        width: 100,
+                                        height: 48,
+                                        child: Center(
+                                          child: AppText(
+                                            "Submit Review",
+                                            size: 14,
+                                            bold: FontWeight.w700,
+                                            color: AppTheme.appColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      });
+                },
+                child: Icon(Icons.edit_sharp),
+              ),
+          )
+          : null,
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
           centerTitle: true,
@@ -180,219 +320,6 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
             ),
           ),
           SizeBoxHeight12(),
-          Container(
-
-              // height: size.height * 0.35,
-              width: size.width * 0.90,
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(5)),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    // top: 13,
-                    // left: 20,
-                    // right: 0
-                    ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10, top: 5),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 0.0, right: 0.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            AppText(
-                              "All ratings (100+)",
-                              size: 20,
-                              color: AppTheme.appColor,
-                              bold: FontWeight.w700,
-                            ),
-                            Spacer(),
-                            Icon(
-                              Icons.star,
-                              size: 16,
-                              color: AppTheme.ratingYellowColor,
-                            ),
-                            SizeBoxWidth4(),
-                            AppText(
-                              "3.8",
-                              color: AppTheme.appColor,
-                              size: 20,
-                              bold: FontWeight.w700,
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizeBoxHeight5(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AppText(
-                            "5",
-                            size: 20,
-                            color: AppTheme.appColor,
-                            bold: FontWeight.w700,
-                          ),
-                          SizeBoxWidth8(),
-                          Icon(
-                            Icons.star,
-                            size: 16,
-                            color: AppTheme.ratingYellowColor,
-                          ),
-                          SizeBoxWidth4(),
-                          LinearPercentIndicator(
-                            barRadius: Radius.circular(20),
-                            width: 230.0,
-                            lineHeight: 5.0,
-                            percent: 0.40,
-                            backgroundColor: Colors.grey,
-                            progressColor: AppTheme.appColor,
-                          ),
-                          AppText(
-                            "49%",
-                            size: 16,
-                            bold: FontWeight.w700,
-                            color: AppTheme.appColor,
-                          )
-                        ],
-                      ),
-                      SizeBoxHeight5(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AppText(
-                            "4",
-                            size: 20,
-                            color: AppTheme.appColor,
-                            bold: FontWeight.w700,
-                          ),
-                          SizeBoxWidth8(),
-                          Icon(
-                            Icons.star,
-                            size: 16,
-                            color: AppTheme.ratingYellowColor,
-                          ),
-                          SizeBoxWidth4(),
-                          LinearPercentIndicator(
-                            barRadius: Radius.circular(20),
-                            width: 230.0,
-                            lineHeight: 5.0,
-                            percent: 0.30,
-                            backgroundColor: Colors.grey,
-                            progressColor: AppTheme.appColor,
-                          ),
-                          AppText(
-                            "30%",
-                            bold: FontWeight.w700,
-                            size: 16,
-                            color: AppTheme.appColor,
-                          )
-                        ],
-                      ),
-                      SizeBoxHeight5(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AppText(
-                            "3",
-                            size: 20,
-                            color: AppTheme.appColor,
-                            bold: FontWeight.w700,
-                          ),
-                          SizeBoxWidth8(),
-                          Icon(
-                            Icons.star,
-                            size: 16,
-                            color: AppTheme.ratingYellowColor,
-                          ),
-                          SizeBoxWidth4(),
-                          LinearPercentIndicator(
-                            barRadius: Radius.circular(20),
-                            width: 230.0,
-                            lineHeight: 5.0,
-                            percent: 0.20,
-                            backgroundColor: Colors.grey,
-                            progressColor: AppTheme.appColor,
-                          ),
-                          AppText(
-                            "20%",
-                            size: 16,
-                            bold: FontWeight.w700,
-                            color: AppTheme.appColor,
-                          )
-                        ],
-                      ),
-                      SizeBoxHeight5(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AppText(
-                            "2",
-                            size: 20,
-                            color: AppTheme.appColor,
-                            bold: FontWeight.w700,
-                          ),
-                          SizeBoxWidth8(),
-                          Icon(
-                            Icons.star,
-                            size: 16,
-                            color: AppTheme.ratingYellowColor,
-                          ),
-                          SizeBoxWidth4(),
-                          LinearPercentIndicator(
-                            barRadius: Radius.circular(20),
-                            width: 230.0,
-                            lineHeight: 5.0,
-                            percent: 0.10,
-                            backgroundColor: Colors.grey,
-                            progressColor: AppTheme.appColor,
-                          ),
-                          AppText(
-                            "10%",
-                            size: 16,
-                            bold: FontWeight.w700,
-                            color: AppTheme.appColor,
-                          )
-                        ],
-                      ),
-                      SizeBoxHeight5(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AppText(
-                            "1",
-                            size: 20,
-                            color: AppTheme.appColor,
-                            bold: FontWeight.w700,
-                          ),
-                          SizeBoxWidth8(),
-                          Icon(
-                            Icons.star,
-                            size: 16,
-                            color: AppTheme.ratingYellowColor,
-                          ),
-                          SizeBoxWidth4(),
-                          LinearPercentIndicator(
-                            barRadius: Radius.circular(20),
-                            width: 230.0,
-                            lineHeight: 5.0,
-                            percent: 0.20,
-                            backgroundColor: Colors.grey,
-                            progressColor: AppTheme.appColor,
-                          ),
-                          AppText(
-                            "15%",
-                            size: 16,
-                            bold: FontWeight.w700,
-                            color: AppTheme.appColor,
-                          )
-                        ],
-                      ),
-                      SizeBoxHeight5()
-                    ],
-                  ),
-                ),
-              )),
           SizeBoxHeight10(),
           Padding(
             padding: const EdgeInsets.only(right: 18.0, left: 18.0),
@@ -433,54 +360,95 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                 borderRadius: BorderRadius.circular(10)),
                             child: Padding(
                               padding: const EdgeInsets.only(
-                                  left: 10, right: 10, top: 10),
+                                  left: 10, right: 10, top: 15),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  AppText(
-                                    "Monika",
-                                    size: 16,
-                                    bold: FontWeight.w700,
-                                    color: AppTheme.appColor,
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      AppText(
+                                        "Monika",
+                                        size: 16,
+                                        bold: FontWeight.w700,
+                                        color: AppTheme.appColor,
+                                      ),
+                                      AppText(
+                                        "1 day ago",
+                                        size: 12,
+                                        bold: FontWeight.w400,
+                                        color: AppTheme.appColor,
+                                      ),
+                                    ],
                                   ),
                                   SizeBoxHeight5(),
-                                  AppText(
-                                    "1 day ago",
-                                    size: 10,
-                                    bold: FontWeight.w300,
-                                    color: AppTheme.appColor,
-                                  ),
-                                  SizeBoxHeight10(),
-                                  AppText(
-                                    "Excellent...!",
-                                    size: 14,
-                                    bold: FontWeight.w400,
-                                    color: AppTheme.appColor,
-                                  ),
-                                  SizeBoxHeight10(),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: Container(
-                                      width: 100,
-                                      height: 30,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: AppTheme.appColor),
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 5),
-                                        child: AppText(
-                                          "Helpful",
-                                          size: 14,
-                                          bold: FontWeight.w500,
-                                          color: AppTheme.appColor,
-                                        ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
                                       ),
-                                    ),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                      ),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                      ),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                      ),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                      ),
+                                    ],
                                   ),
+                                  SizeBoxHeight10(),
+                                  SizeBoxHeight10(),
+                                  Row(
+                                    children: [
+                                      AppText(
+                                        "Excellent...!",
+                                        size: 14,
+                                        bold: FontWeight.bold,
+                                        color: AppTheme.appColor,
+                                      ),
+                                      Spacer(),
+                                      widget.uType == 1
+                                          ? GestureDetector(
+                                              onTap: () {},
+                                              child: Container(
+                                                width: 100,
+                                                height: 40,
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color:
+                                                            AppTheme.appColor),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20)),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 5),
+                                                  child: AppText(
+                                                    "Reply",
+                                                    size: 14,
+                                                    bold: FontWeight.w800,
+                                                    color: AppTheme.appColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          : SizedBox()
+                                    ],
+                                  ),
+                                  SizeBoxHeight10(),
                                   SizeBoxHeight10()
                                 ],
                               ),

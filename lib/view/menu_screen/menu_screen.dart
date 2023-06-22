@@ -137,14 +137,11 @@ class _VandorScreenState extends State<VandorScreen> {
               ),
             ),
           ),
-          title: Align(
-            alignment: Alignment.center,
-            child: AppText(
-              "Welcome to ${widget.businessName}",
-              color: AppTheme.appColor,
-              size: 22,
-              bold: FontWeight.bold,
-            ),
+          title: AppText(
+            "Welcome to ${widget.businessName}",
+            color: AppTheme.appColor,
+            size: 22,
+            bold: FontWeight.bold,
           )),
       body: SingleChildScrollView(
         child: Column(
@@ -202,6 +199,7 @@ class _VandorScreenState extends State<VandorScreen> {
                                       lon: widget.long,
                                       businessName: widget.businessName,
                                       location: widget.location,
+                                      uType: widget.uType,
                                     ));
                                   },
                                   child: AppText(
@@ -232,6 +230,7 @@ class _VandorScreenState extends State<VandorScreen> {
                                       lon: widget.long,
                                       businessName: widget.businessName,
                                       location: widget.location,
+                                      uType: widget.uType,
                                     ));
                                   },
                                   child: AppText(
