@@ -33,26 +33,3 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     );
   }
 }
-
-// var _androidAppRetain = MethodChannel("android_app_retain");
-
-// @override
-// Widget build(BuildContext context) {
-//   return WillPopScope(
-//     onWillPop: () {
-//       if (Platform.isAndroid) {
-//         if (Navigator.of(context).canPop()) {
-//           return Future.value(true);
-//         } else {
-//           _androidAppRetain.invokeMethod("sendToBackground");
-//           return Future.value(false);
-//         }
-//       } else {
-//         return Future.value(true);
-//       }
-//     },
-//     child: Scaffold(
-//     ...
-//     ),
-//   );
-// }
