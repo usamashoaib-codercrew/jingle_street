@@ -24,9 +24,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../../config/variables/global_variables.dart';
-import '../buy_screen/cart_confirm_order_screen.dart';
-
 List isRated = List.generate(36, (index) => 1, growable: true);
 
 final List<GlobalKey> _globalKeys = List.generate(15, (_) => GlobalKey());
@@ -96,7 +93,6 @@ class _VandorScreenState extends State<VandorScreen> {
   @override
   void initState() {
     dio = AppDio(context);
-    getCounter();
     Logger.init();
     super.initState();
     _futureGetItems = getVendorItems();
@@ -119,55 +115,6 @@ class _VandorScreenState extends State<VandorScreen> {
     return Scaffold(
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
-          actions: [
-            Stack(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CartConfirmOrderScreen(),
-                          ));
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: Icon(
-                        Icons.shopping_cart_outlined,
-                        color: AppTheme.appColor,
-                        size: 30,
-                      ),
-                    ),
-                  ),
-                  if (Globals.counter > 0)
-                    Positioned(
-                      right: 5,
-                      top: 4,
-                      child: Container(
-                        padding: EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          Globals.counter.toString(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            
-            SizedBox(width: 20),
-          ],
           centerTitle: true,
           backgroundColor: AppTheme.whiteColor,
           elevation: 0,
@@ -224,10 +171,6 @@ class _VandorScreenState extends State<VandorScreen> {
                   );
                 },
               ),
-              // child: Image.network(
-              //   "${widget.photo}",
-              //   fit: BoxFit.cover,
-              // ),
             ),
             SizeBoxHeight4(),
             Padding(
@@ -823,17 +766,5 @@ class _VandorScreenState extends State<VandorScreen> {
         },
       );
     }
-  }
-
-  setCounter() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-
-    preferences.setInt("cartCounter", Globals.counter);
-  }
-
-  getCounter() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    Globals.counter = preferences.getInt("cartCounter") as int;
-    setState(() {});
   }
 }

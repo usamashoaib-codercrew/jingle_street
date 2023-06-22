@@ -4,7 +4,6 @@ import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
-import 'package:jingle_street/view/buy_screen/add_to_card_screen.dart';
 import 'package:jingle_street/view/menu_screen/detail_edit_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
@@ -57,22 +56,7 @@ class _SandwichBuilderState extends State<SandwichBuilder> {
                                 v_type: widget.vType),
                           ));
                     }
-                  : () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddToCardScreen(
-                              catagoryName: widget.itemData[i]['name'],
-                              catagoryDiscrption: widget.itemData[i]
-                                  ['description'],
-                              catagoryPrice: widget.itemData[i]['price'],
-                              catagoryImages: widget.itemData[i]['images'],
-                              length: widget.itemData[i]['images'].length,
-                              itemId: widget.itemData[i]["id"],
-
-                            ),
-                          ));
-                    },
+                  : () {},
               child: Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -168,7 +152,9 @@ class _SandwichBuilderState extends State<SandwichBuilder> {
                                   : InkWell(
                                       onTap: () {
                                         //add to cart code
-                                        Provider.of<CartCounter>(context, listen: false).increment();
+                                        Provider.of<CartCounter>(context,
+                                                listen: false)
+                                            .increment();
                                       },
                                       child: CircleAvatar(
                                         radius: 8,

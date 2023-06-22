@@ -5,13 +5,10 @@ import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
-import 'package:jingle_street/view/buy_screen/add_to_card_screen.dart';
 import 'package:jingle_street/view/menu_screen/detail_edit_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../config/variables/global_variables.dart';
 
 class BurgerBuilder extends StatefulWidget {
   final itemData;
@@ -64,21 +61,7 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
                             ),
                           ));
                     }
-                  : () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddToCardScreen(
-                              catagoryName: widget.itemData[i]['name'],
-                              catagoryDiscrption: widget.itemData[i]
-                                  ['description'],
-                              catagoryPrice: widget.itemData[i]['price'],
-                              catagoryImages: widget.itemData[i]['images'],
-                              length: widget.itemData[i]['images'].length,
-                              itemId: widget.itemData[i]["id"],
-                            ),
-                          ));
-                    },
+                  : () {},
               child: Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -176,9 +159,6 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
                                   : InkWell(
                                       onTap: () {
                                         //add code for add to cart items
-                                        _addItemToList(i);
-                                        Globals.counter++;
-                                        setCounter();
                                       },
                                       child: CircleAvatar(
                                         radius: 8,
@@ -202,49 +182,5 @@ class _BurgerBuilderState extends State<BurgerBuilder> {
         },
       ),
     );
-  }
-
-  setCounter() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-
-    preferences.setInt("cartCounter", Globals.counter);
-  }
-
-  getCounter() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    Globals.counter = preferences.getInt("cartCounter") as int;
-    setState(() {});
-  }
-
-  ///////////////////////////////////////////////
-  void _addItemToList(index) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('myItemsList');
-    itemsList = jsonString != null
-        ? List<Map<String, dynamic>>.from(jsonDecode(jsonString))
-        : [];
-    // Add a new map item to the list
-    Map<String, dynamic> newItem = {
-      'itemPicture': widget.itemData[index]["images"][0]['url'],
-      'itemName': widget.itemData[index]["name"],
-      'itemPrice': widget.itemData[index]["price"],
-      'itemId': widget.itemData[index]["id"],
-      'counterValue': Globals.counterValue,
-    };
-
-    int itemIndex = itemsList
-        .indexWhere((element) => element['itemId'] == newItem['itemId']);
-    if (itemIndex != -1) {
-      setState(() {
-        itemsList[itemIndex]['counterValue']++; // Increment the count by 1
-        int price = itemsList[itemIndex]['itemPrice'];
-        num updatedPrice = price + widget.itemData[index]["price"];
-        itemsList[itemIndex]['itemPrice'] = updatedPrice;
-      });
-    } else {
-      itemsList.add(newItem);
-    }
-    String updateJsonString = jsonEncode(itemsList);
-    await prefs.setString('myItemsList', updateJsonString);
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jingle_street/resources/widgets/fields/bottom_navigation_bar_field.dart';
-import 'package:jingle_street/view/buy_screen/cart_confirm_order_screen.dart';
 import 'package:jingle_street/view/home_screen/google_map_screen.dart';
 import 'package:jingle_street/view/home_screen/notification_screen.dart';
 import 'package:jingle_street/view/home_screen/setting_screen/setting_screen.dart';
@@ -23,7 +22,6 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       bodyList: [
         GoogleMapScreen(type: widget.type,token: widget.token),
         NotificationScreen(),
-        CartConfirmOrderScreen(),
         SettingScreen(type: widget.type,name: widget.name, ),
       ],
       iconData: [
