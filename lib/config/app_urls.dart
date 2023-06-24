@@ -17,5 +17,10 @@ class AppUrls {
   static final String addItemImage = "/api/additemimage";
   static final String searchHasTag = "/api/searchvendor";
   static final String updateStatusCode = "/api/updatestatus";
+  static final String addReview = "/api/review";
+  static final String getVenderreviews= "/api/getvendorreviews";
+  static final String replyComments= "/api/reply";
+
+
 
 }

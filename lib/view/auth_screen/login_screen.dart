@@ -198,41 +198,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: 15,
                           controller: _passwordController),
                       SizeBoxHeight4(),
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //   children: [
-                      //     AppCheckBox(
-                      //       hoverColor: AppTheme.appColor,
-                      //       activeColor: Colors.white,
-                      //       borderSidewidth: 0.1,
-                      //       borderSideColor: AppTheme.appColor,
-                      //       focusColor: AppTheme.appColor,
-                      //       checkColor: AppTheme.appColor,
-                      //       value: _isChecked,
-                      //       onChanged: (val) {
-                      //         _handleRememberMe(val!);
-                      //         // saveLoginData(val!);
-                      //       },
-                      //     ),
-                      //     Expanded(
-                      //       child: AppText("Remember me",
-                      //           color: AppTheme.appColor, size: 15),
-                      //     ),
-                      //     // AppText(
-                      //     //   "Forgot password?",
-                      //     //   color: AppTheme.appColor,
-                      //     //   size: 12,
-                      //     //   onTap: () {
-                      //     //     Navigator.push(
-                      //     //         context,
-                      //     //         MaterialPageRoute(
-                      //     //           builder: (context) =>
-                      //     //               SetPasswordByPhoneNumber(),
-                      //     //         ));
-                      //     //   },
-                      //     // ),
-                      //   ],
-                      // ),
                       SizedBox(
                         height: 40,
                       ),

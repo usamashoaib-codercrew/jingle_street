@@ -1,4 +1,6 @@
 import 'dart:io';
+
+import 'package:dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
@@ -21,7 +23,6 @@ import 'package:jingle_street/view/menu_screen/sauces_builder_screen.dart';
 import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 List isRated = List.generate(36, (index) => 1, growable: true);
@@ -93,6 +94,7 @@ class _VandorScreenState extends State<VandorScreen> {
   @override
   void initState() {
     dio = AppDio(context);
+
     Logger.init();
     super.initState();
     _futureGetItems = getVendorItems();
@@ -105,6 +107,9 @@ class _VandorScreenState extends State<VandorScreen> {
   Widget build(BuildContext context) {
     print("vtype..${widget.vType}");
     bool myBoolean = Provider.of<BoolProvider>(context).myBoolean;
+    final widthScreen = MediaQuery.of(context).size.width;
+
+    final heightScreen = MediaQuery.of(context).size.height;
     var size = MediaQuery.of(context).size;
 
     if (myBoolean) {
@@ -115,6 +120,10 @@ class _VandorScreenState extends State<VandorScreen> {
     return Scaffold(
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
+          actions: [
+            widget.uType == 0 ? Icon(Icons.favorite_border_outlined,color: AppTheme.appColor) : SizedBox(),
+            SizedBox(width: 20),
+          ],
           centerTitle: true,
           backgroundColor: AppTheme.whiteColor,
           elevation: 0,
@@ -137,11 +146,14 @@ class _VandorScreenState extends State<VandorScreen> {
               ),
             ),
           ),
-          title: AppText(
-            "Welcome to ${widget.businessName}",
-            color: AppTheme.appColor,
-            size: 22,
-            bold: FontWeight.bold,
+          title: Align(
+            alignment: Alignment.center,
+            child: AppText(
+              "Welcome to ${widget.businessName}",
+              color: AppTheme.appColor,
+              size: 22,
+              bold: FontWeight.bold,
+            ),
           )),
       body: SingleChildScrollView(
         child: Column(
@@ -168,6 +180,10 @@ class _VandorScreenState extends State<VandorScreen> {
                   );
                 },
               ),
+              // child: Image.network(
+              //   "${widget.photo}",
+              //   fit: BoxFit.cover,
+              // ),
             ),
             SizeBoxHeight4(),
             Padding(
@@ -195,11 +211,12 @@ class _VandorScreenState extends State<VandorScreen> {
                                       profileImage: widget.photo,
                                       address: widget.address,
                                       vType: widget.vType,
+                                      uType: widget.uType,
                                       lat: widget.lat,
                                       lon: widget.long,
                                       businessName: widget.businessName,
                                       location: widget.location,
-                                      uType: widget.uType,
+                                      vId: widget.id,
                                     ));
                                   },
                                   child: AppText(
@@ -226,11 +243,12 @@ class _VandorScreenState extends State<VandorScreen> {
                                       profileImage: widget.photo,
                                       address: widget.address,
                                       vType: widget.vType,
+                                      uType: widget.uType,
                                       lat: widget.lat,
                                       lon: widget.long,
                                       businessName: widget.businessName,
                                       location: widget.location,
-                                      uType: widget.uType,
+                                      vId: widget.id,
                                     ));
                                   },
                                   child: AppText(

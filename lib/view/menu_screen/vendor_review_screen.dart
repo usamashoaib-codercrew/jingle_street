@@ -1,13 +1,21 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dialogs/dialogs/progress_dialog.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:jingle_street/config/app_urls.dart';
+import 'package:jingle_street/config/dio/app_dio.dart';
+import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/fields/app_fields.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
+import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:req_fun/req_fun.dart';
+import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class VendorReviewScreen extends StatefulWidget {
@@ -15,168 +23,123 @@ class VendorReviewScreen extends StatefulWidget {
   final String address;
   final String businessName;
   final int vType;
+  final int uType;
   final double lat;
   final double lon;
   final location;
-  final uType;
+  final vId;
   const VendorReviewScreen(
       {super.key,
       required this.profileImage,
       required this.address,
       required this.vType,
+      required this.uType,
       required this.lat,
       required this.lon,
       required this.businessName,
       this.location,
-      this.uType});
+      this.vId});
 
   @override
   State<VendorReviewScreen> createState() => _VendorReviewScreenState();
 }
 
-TextEditingController _commentsController = TextEditingController();
-
 class _VendorReviewScreenState extends State<VendorReviewScreen> {
+  TextEditingController _commentsController = TextEditingController();
+
+  int _rating = 0;
+  bool loading = false;
+  late AppDio dio;
+  var reviewData;
+
+  // bool replyVisibility = false;
+  Widget _buildStar(int index, StateSetter stateSetter) {
+    IconData iconData = index <= _rating ? Icons.star : Icons.star;
+    Color color = index <= _rating ? Colors.yellow : Colors.white;
+    return GestureDetector(
+      onTap: () {
+        stateSetter(() {
+          _rating = index;
+        });
+        // print("rating_is $_rating");
+      },
+      child: Icon(
+        iconData,
+        color: color,
+      ),
+    );
+  }
+
+  List<TextEditingController>? _replyFromVendor;
+  List<bool>? replyVisibility;
+
+  @override
+  void initState() {
+    dio = AppDio(context);
+    getVenderReviews();
+
+    super.initState();
+  }
+
+  void showReviewDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.appColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration:
+                    Duration(seconds: 1), // Customize the animation duration
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.whiteColor,
+                ),
+                child: Icon(
+                  Icons.check,
+                  color: AppTheme.appColor,
+                  size: 40,
+                ),
+              ),
+              SizedBox(height: 16),
+              AppText(
+                "Thanks for the review!",
+                color: AppTheme.whiteColor,
+                size: 18,
+                bold: FontWeight.bold,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: AppText(
+                "OK",
+                color: AppTheme.whiteColor,
+                size: 16,
+                bold: FontWeight.bold,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("ratings_get ${_rating}");
+
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      floatingActionButton: widget.uType == 0
-          ? Padding(
-            padding: const EdgeInsets.only(right:10.0),
-            child: FloatingActionButton(
-              
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          backgroundColor: AppTheme.appColor,
-                          content: Container(
-                            width: double.infinity,
-                            height: 420,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: SingleChildScrollView(
-                              
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  AppText(
-                                    "Tell us, how was our food?",
-                                    size: 22,
-                                    bold: FontWeight.w700,
-                                    color: AppTheme.whiteColor,
-                                  ),
-                                  Divider(
-                                      thickness: 2,
-                                      endIndent: 10,
-                                      indent: 10,
-                                      color: AppTheme.whiteColor),
-                                  SizeBoxHeight20(),
-                                  CircleAvatar(
-                                    backgroundColor: AppTheme.appColor,
-                                    radius: 40,
-                                    backgroundImage:
-                                        AssetImage('assets/images/Mcdonald.png'),
-                                  ),
-                                  SizeBoxHeight16(),
-                                  AppText(
-                                    "Ahsan khan",
-                                    size: 24,
-                                    bold: FontWeight.w700,
-                                    color: AppTheme.whiteColor,
-                                  ),
-                                  SizeBoxHeight20(),
-                                  AppText(
-                                    "Rate the care provided Tuesday, Feb 28",
-                                    size: 16,
-                                    bold: FontWeight.w400,
-                                    color: AppTheme.whiteColor,
-                                  ),
-                                  SizeBoxHeight5(),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.star, color: Colors.yellow),
-                                      Icon(Icons.star, color: Colors.yellow),
-                                      Icon(Icons.star, color: Colors.yellow),
-                                      Icon(Icons.star, color: Colors.white),
-                                      Icon(Icons.star, color: Colors.white),
-                                    ],
-                                  ),
-                                  SizeBoxHeight16(),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.whiteColor,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: AppField(
-                                      hintText: 'Additional Comments...',
-                                      textEditingController: _commentsController,
-                                      borderSideColor: AppTheme.whiteColor,
-                                      borderRadius: BorderRadius.circular(10),
-                                      maxLines: 3,
-                                    ),
-                                  ),
-                                  SizeBoxHeight16(),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(2),
-                                          border: Border.all(
-                                            width: 1,
-                                            color: AppTheme.whiteColor,
-                                          ),
-                                        ),
-                                        width: 100,
-                                        height: 48,
-                                        child: Center(
-                                          child: AppText(
-                                            "Not Now",
-                                            size: 14,
-                                            bold: FontWeight.w700,
-                                            color: AppTheme.whiteColor,
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.whiteColor,
-                                          borderRadius: BorderRadius.circular(2),
-                                        ),
-                                        width: 100,
-                                        height: 48,
-                                        child: Center(
-                                          child: AppText(
-                                            "Submit Review",
-                                            size: 14,
-                                            bold: FontWeight.w700,
-                                            color: AppTheme.appColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      });
-                },
-                child: Icon(Icons.edit_sharp),
-              ),
-          )
-          : null,
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
           centerTitle: true,
@@ -319,153 +282,552 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
               ),
             ),
           ),
-          SizeBoxHeight12(),
           SizeBoxHeight10(),
-          Padding(
-            padding: const EdgeInsets.only(right: 18.0, left: 18.0),
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(5)),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 13, left: 13, right: 13),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 13),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+          reviewData == null
+              ? Center(
+                  child: CircularProgressIndicator(color: AppTheme.whiteColor),
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(
+                      right: 18.0, left: 18.0, bottom: 10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(5)),
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(top: 13, left: 13, right: 13),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          AppText(
-                            "Reviews ",
-                            size: 20,
-                            bold: FontWeight.w700,
-                            color: AppTheme.appColor,
+                          Padding(
+                            padding: const EdgeInsets.only(left: 13),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                AppText(
+                                  "Reviews ",
+                                  size: 20,
+                                  bold: FontWeight.w700,
+                                  color: AppTheme.appColor,
+                                ),
+                              ],
+                            ),
                           ),
+                          SizeBoxHeight10(),
+                          ListView.builder(
+                              scrollDirection: Axis.vertical,
+                              itemCount: reviewData.length,
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: ((context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    print(
+                                        "123333333333333333333333333333333333333333");
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                        left: 10,
+                                        right: 10,
+                                        top: 10,
+                                        bottom: 10),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: AppTheme.appColor),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 10, right: 10, top: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              AppText(
+                                                "${reviewData[index]["name"]}",
+                                                size: 16,
+                                                bold: FontWeight.w700,
+                                                color: AppTheme.appColor,
+                                              ),
+                                              buildTimeAgoTextWidget(
+                                                  reviewData[index]
+                                                      ["updatedAt"]),
+                                            ],
+                                          ),
+                                          SizeBoxHeight5(),
+                                          Row(
+                                            children: [
+                                              for (int i = 0;
+                                                  i <
+                                                      reviewData[index]
+                                                          ["rating"];
+                                                  i++)
+                                                Icon(Icons.star,
+                                                    color: Colors.yellow),
+                                              for (int i = reviewData[index]
+                                                      ["rating"];
+                                                  i < 5;
+                                                  i++)
+                                                Icon(Icons.star,
+                                                    color: Colors.grey),
+                                            ],
+                                          ),
+                                          SizeBoxHeight10(),
+                                          widget.uType == 1
+                                              ? reviewData[index]["comment"] ==
+                                                      null
+                                                  ? Row(
+                                                      children: [
+                                                        AppText(
+                                                          "${reviewData[index]["review"]}",
+                                                          size: 14,
+                                                          bold: FontWeight.w400,
+                                                          color:
+                                                              AppTheme.appColor,
+                                                        ),
+                                                        Spacer(),
+                                                        Visibility(
+                                                          visible:
+                                                              !replyVisibility![
+                                                                  index],
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () {
+                                                              setState(() {
+                                                                replyVisibility![
+                                                                        index] =
+                                                                    !replyVisibility![
+                                                                        index];
+                                                              });
+                                                            },
+                                                            child: Container(
+                                                              width: 24.w,
+                                                              height: 5.h,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              decoration: BoxDecoration(
+                                                                  border: Border.all(
+                                                                      color: AppTheme
+                                                                          .appColor),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20)),
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                            .only(
+                                                                        right:
+                                                                            5),
+                                                                child: AppText(
+                                                                  "Reply",
+                                                                  size: 14,
+                                                                  bold:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                  color: AppTheme
+                                                                      .appColor,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )
+                                                  : Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        AppText(
+                                                          "${reviewData[index]["review"]}",
+                                                          size: 14,
+                                                          bold: FontWeight.w400,
+                                                          color:
+                                                              AppTheme.appColor,
+                                                        ),
+                                                        SizedBox(
+                                                          height: 10,
+                                                        ),
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                      .only(
+                                                                  left: 20.0,
+                                                                  top: 5),
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              AppText(
+                                                                "${widget.businessName.toCapitalize()}",
+                                                                size: 16,
+                                                                bold: FontWeight
+                                                                    .bold,
+                                                                color: AppTheme
+                                                                    .appColor,
+                                                              ),
+                                                              SizedBox(
+                                                                height: 7,
+                                                              ),
+                                                              AppText(
+                                                                "${reviewData[index]["comment"]}",
+                                                                size: 14,
+                                                                bold: FontWeight
+                                                                    .w400,
+                                                                color: AppTheme
+                                                                    .appColor,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )
+                                              : Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    AppText(
+                                                      "${reviewData[index]["review"]}",
+                                                      size: 14,
+                                                      bold: FontWeight.w400,
+                                                      color: AppTheme.appColor,
+                                                    ),
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    reviewData[index]
+                                                                ["comment"] ==
+                                                            null
+                                                        ? SizedBox()
+                                                        : Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    left: 20.0,
+                                                                    top: 5),
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                AppText(
+                                                                  "${widget.businessName.toCapitalize()}",
+                                                                  size: 16,
+                                                                  bold:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: AppTheme
+                                                                      .appColor,
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 5,
+                                                                ),
+                                                                AppText(
+                                                                  "${reviewData[index]["comment"]}",
+                                                                  size: 14,
+                                                                  bold:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                  color: AppTheme
+                                                                      .appColor,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          )
+                                                  ],
+                                                ),
+                                          SizeBoxHeight16(),
+                                          Visibility(
+                                            visible: replyVisibility![index],
+                                            child: Container(
+                                              height: 13.h,
+                                              child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      height: 110,
+                                                      width: 220,
+                                                      color: Colors.white,
+                                                      child: AppField(
+                                                        hintText: "Reply",
+                                                        maxLines: 2,
+                                                        hintTextColor:
+                                                            Colors.redAccent,
+                                                        fontSize: 10.sp,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                        borderSideColor:
+                                                            AppTheme.appColor,
+                                                        textEditingController:
+                                                            _replyFromVendor![
+                                                                index],
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 8,
+                                                    ),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          bottom: 3.h),
+                                                      child: Container(
+                                                          height: 6.h,
+                                                          width: 12.w,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: AppTheme
+                                                                .appColor,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        100),
+                                                          ),
+                                                          child: IconButton(
+                                                              onPressed: () {
+                                                                if (_replyFromVendor![
+                                                                        index]
+                                                                    .text
+                                                                    .isNotEmpty) {
+                                                                  commentsReply(
+                                                                      index);
+                                                                  FocusScope.of(
+                                                                          context)
+                                                                      .unfocus();
+                                                                } else {
+                                                                  ScaffoldMessenger.of(
+                                                                          context)
+                                                                      .showSnackBar(
+                                                                          const SnackBar(
+                                                                    content: Text(
+                                                                        'The phone number is missing.'),
+                                                                  ));
+                                                                  FocusScope.of(
+                                                                          context)
+                                                                      .unfocus();
+                                                                }
+
+                                                                setState(() {
+                                                                  replyVisibility![
+                                                                          index] =
+                                                                      !replyVisibility![
+                                                                          index];
+                                                                });
+                                                              },
+                                                              icon: Icon(
+                                                                Icons.send,
+                                                                color: AppTheme
+                                                                    .whiteColor,
+                                                              ))),
+                                                    ),
+                                                  ]),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }))
                         ],
                       ),
                     ),
-                    SizeBoxHeight10(),
-                    ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        itemCount: 5,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: ((context, index) {
-                          return Container(
-                            margin: EdgeInsets.only(
-                                left: 10, right: 10, top: 10, bottom: 10),
-                            decoration: BoxDecoration(
-                                border: Border.all(color: AppTheme.appColor),
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 10, right: 10, top: 15),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      AppText(
-                                        "Monika",
-                                        size: 16,
-                                        bold: FontWeight.w700,
-                                        color: AppTheme.appColor,
-                                      ),
-                                      AppText(
-                                        "1 day ago",
-                                        size: 12,
-                                        bold: FontWeight.w400,
-                                        color: AppTheme.appColor,
-                                      ),
-                                    ],
-                                  ),
-                                  SizeBoxHeight5(),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                      ),
-                                    ],
-                                  ),
-                                  SizeBoxHeight10(),
-                                  SizeBoxHeight10(),
-                                  Row(
-                                    children: [
-                                      AppText(
-                                        "Excellent...!",
-                                        size: 14,
-                                        bold: FontWeight.bold,
-                                        color: AppTheme.appColor,
-                                      ),
-                                      Spacer(),
-                                      widget.uType == 1
-                                          ? GestureDetector(
-                                              onTap: () {},
-                                              child: Container(
-                                                width: 100,
-                                                height: 40,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color:
-                                                            AppTheme.appColor),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20)),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 5),
-                                                  child: AppText(
-                                                    "Reply",
-                                                    size: 14,
-                                                    bold: FontWeight.w800,
-                                                    color: AppTheme.appColor,
-                                                  ),
-                                                ),
-                                              ),
-                                            )
-                                          : SizedBox()
-                                    ],
-                                  ),
-                                  SizeBoxHeight10(),
-                                  SizeBoxHeight10()
-                                ],
-                              ),
-                            ),
-                          );
-                        }))
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-          SizeBoxHeight12(),
         ]),
       ),
+      floatingActionButton: widget.uType == 0
+          ? Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: FloatingActionButton(
+                backgroundColor: AppTheme.appColor,
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          scrollable: true,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          backgroundColor: AppTheme.appColor,
+                          content: StatefulBuilder(
+                            builder: (context, setState) {
+                              return Container(
+                                // height: 500,
+                                width: size.width,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    AppText(
+                                      "Tell us, how was our food?",
+                                      size: 22,
+                                      bold: FontWeight.w700,
+                                      color: AppTheme.whiteColor,
+                                    ),
+                                    Divider(
+                                        thickness: 2,
+                                        endIndent: 10,
+                                        indent: 10,
+                                        color: AppTheme.whiteColor),
+                                    SizeBoxHeight20(),
+                                    CircleAvatar(
+                                      backgroundColor: AppTheme.appColor,
+                                      radius: 40,
+                                      // backgroundImage: AssetImage('assets/images/Mcdonald.png'),
+                                      backgroundImage:
+                                          NetworkImage(widget.profileImage),
+                                    ),
+                                    SizeBoxHeight16(),
+                                    AppText(
+                                      widget.businessName,
+                                      size: 24,
+                                      bold: FontWeight.w700,
+                                      color: AppTheme.whiteColor,
+                                    ),
+                                    SizeBoxHeight20(),
+                                    AppText(
+                                      "Rate the care provided Tuesday, Feb 28",
+                                      size: 16,
+                                      bold: FontWeight.w400,
+                                      color: AppTheme.whiteColor,
+                                    ),
+                                    SizeBoxHeight5(),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: List.generate(
+                                          5,
+                                          (index) =>
+                                              _buildStar(index + 1, setState)),
+                                    ),
+                                    SizeBoxHeight16(),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.whiteColor,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: AppField(
+                                        hintText: 'Additional Comments...',
+                                        textEditingController:
+                                            _commentsController,
+                                        borderRadius: BorderRadius.circular(10),
+                                        maxLines: 3,
+                                        borderSideColor: AppTheme.whiteColor,
+                                      ),
+                                    ),
+                                    SizeBoxHeight16(),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).pop();
+                                            _commentsController.clear();
+                                            _rating = 0;
+                                            setState;
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                width: 1,
+                                                color: AppTheme.whiteColor,
+                                              ),
+                                            ),
+                                            width: size.width * 0.28,
+                                            height: 40,
+                                            child: Center(
+                                              child: AppText(
+                                                "Not Now",
+                                                size: 15,
+                                                bold: FontWeight.w700,
+                                                color: AppTheme.whiteColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (_rating == 0) {
+                                              FocusScope.of(context).unfocus();
+
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      'Please add ratings first!'),
+                                                ),
+                                              );
+                                            } else if (_commentsController
+                                                .text.isEmpty) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    'Please add Some Comments!'),
+                                              ));
+                                            } else {
+                                              sendReview();
+                                              FocusScope.of(context).unfocus();
+
+                                              Navigator.of(context).pop();
+                                            }
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.whiteColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            width: size.width * 0.28,
+                                            height: 40,
+                                            child: Center(
+                                              child: AppText(
+                                                "Submit Review",
+                                                size: 15,
+                                                bold: FontWeight.w700,
+                                                color: AppTheme.appColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    // SizeBoxHeight20(),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }).then((value) {
+                    _commentsController.clear();
+                    _rating = 0;
+                    setState;
+                  });
+                },
+                child: Icon(Icons.edit_outlined),
+              ),
+            )
+          : null,
     );
   }
 
+//////////////////////////////////////
   GetDirectionToVendor(
       {required double lat,
       required double long,
@@ -496,6 +858,165 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
           );
         },
       );
+    }
+  }
+
+  ///////////////////////////////////  vendor reviews api ///////////////////////////////////
+
+  sendReview() async {
+    print("1111$_rating");
+    ProgressDialog progressDialog = ProgressDialog(
+      context: context,
+      backgroundColor: Colors.white,
+      textColor: AppTheme.appColor,
+    );
+    progressDialog.show();
+    loading = true;
+
+    try {
+      final response = await dio.post(
+        path: AppUrls.addReview,
+        data: {
+          'vendor_id': widget.vId,
+          'rating': _rating,
+          'review': _commentsController.getText()
+        },
+      );
+
+      print("1245${response.data}");
+
+      if (loading) {
+        loading = false;
+        progressDialog.dismiss();
+      }
+
+      if (response.statusCode == StatusCode.OK) {
+        showReviewDialog(context);
+        getVenderReviews();
+        setState(() {
+          // Perform any necessary state updates
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Something went wrong, please try again!'),
+        ));
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  /////////////////////////////////// get vendor reviews ///////////////////////////////
+  ///
+
+  Future<void> getVenderReviews() async {
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      final response = await dio.get(
+          path: AppUrls.getVenderreviews,
+          queryParameters: {"vendor_id": widget.vId});
+
+      if (response.statusCode == StatusCode.OK) {
+        var data = response.data;
+        setState(() {
+          reviewData = data["data"];
+          print("review$reviewData");
+          loading = false;
+        });
+      } else {
+        loading = false;
+
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Something went wrong, please try again!'),
+        ));
+        setState(() {
+          loading = false;
+        });
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        loading = false;
+      });
+    }
+    stateChangeFuntion();
+  }
+
+  ///////////////////////////////////////////////
+
+  Widget buildTimeAgoTextWidget(int timestamp) {
+    DateTime now = DateTime.now();
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    Duration difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return AppText(
+        '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago',
+        size: 12,
+        color: AppTheme.appColor,
+      );
+    } else if (difference.inHours > 0) {
+      return AppText(
+        '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago',
+        size: 12,
+        color: AppTheme.appColor,
+      );
+    } else if (difference.inMinutes > 0) {
+      return AppText(
+        '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago',
+        size: 12,
+        color: AppTheme.appColor,
+      );
+    } else {
+      return AppText(
+        'just now',
+        size: 12,
+        color: AppTheme.appColor,
+      );
+    }
+  }
+
+  stateChangeFuntion() {
+    _replyFromVendor =
+        List.generate(reviewData.length, (index) => TextEditingController());
+    replyVisibility = List.generate(reviewData.length, (index) => false);
+  }
+
+  ////////////////////////////
+  ///
+  Future<void> commentsReply(index) async {
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      final response = await dio.post(path: AppUrls.replyComments, data: {
+        "review_id": reviewData[index]["id"],
+        "comment": _replyFromVendor![index].getText()
+      });
+
+      if (response.statusCode == StatusCode.OK) {
+        var data = response.data;
+
+        getVenderReviews();
+
+        print("1111$data");
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Something went wrong, please try again!'),
+        ));
+        setState(() {
+          loading = false;
+        });
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        loading = false;
+      });
     }
   }
 }
