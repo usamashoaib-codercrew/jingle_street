@@ -20,7 +20,6 @@ class AppUrls {
   static final String addReview = "/api/review";
   static final String getVenderreviews= "/api/getvendorreviews";
   static final String replyComments= "/api/reply";
-
-
+  static final String updatefcmToken= "/api/updatefcm";
 
 }

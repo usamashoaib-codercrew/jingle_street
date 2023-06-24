@@ -7,6 +7,7 @@ import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/app_button.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
+import 'package:jingle_street/view/buy_screen/cart_confirm_order_screen.dart';
 import 'package:jingle_street/view/menu_screen/video_player_screen.dart';
 import 'package:page_view_indicators/circle_page_indicator.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +24,12 @@ class AddToCardScreen extends StatefulWidget {
 
   const AddToCardScreen(
       {super.key,
-      this.catagoryName,
-      this.catagoryPrice,
-      this.catagoryDiscrption,
-      this.catagoryImages,
-      this.length,
-      this.itemId});
+        this.catagoryName,
+        this.catagoryPrice,
+        this.catagoryDiscrption,
+        this.catagoryImages,
+        this.length,
+        this.itemId});
 
   @override
   State<AddToCardScreen> createState() => _AddToCardScreenState();
@@ -37,11 +38,68 @@ class AddToCardScreen extends StatefulWidget {
 class _AddToCardScreenState extends State<AddToCardScreen> {
   final _pageIndexNotifier = ValueNotifier<int>(0);
 
+  // final List<dynamic> extraListAdd = [];
+  // final List<String> addExtraItems = [
+  //   'Extra Cheese',
+  //   'Extra Sauce',
+  //   'Extra Ketchup',
+  //   'Extra Salad',
+  // ];
+  // bool _isFilled = false;
+  // bool _isFilled1 = false;
+  // bool _isFilled2 = false;
+  // bool _isFilled3 = false;
+
   bool _alreadyAddedItems = false;
 
-  @override
-  void initState() {
-    // TODO: implement initState
+  List<Map<String, dynamic>> itemsList = [];
+  // List<Map<String, dynamic>> itemsMergedList = [];
+
+  int counterValue = 1;
+
+  Future<void> addToCartItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = jsonEncode(itemsList);
+    await prefs.setString('myItemsList', jsonString);
+  }
+
+  void _addItemToList() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('myItemsList');
+    itemsList = jsonString != null
+        ? List<Map<String, dynamic>>.from(jsonDecode(jsonString))
+        : [];
+    // Add a new map item to the list
+    Map<String, dynamic> newItem = {
+      'itemPicture': widget.catagoryImages[0]['url'],
+      'itemName': widget.catagoryName,
+      'itemPrice': widget.catagoryPrice,
+      'itemId': widget.itemId,
+      'counterValue': counterValue,
+    };
+
+    int itemIndex = itemsList
+        .indexWhere((element) => element['itemId'] == newItem['itemId']);
+    if (itemIndex != -1) {
+      setState(() {
+        itemsList[itemIndex]['counterValue']++; // Increment the count by 1
+        int price = itemsList[itemIndex]['itemPrice'];
+        num updatedPrice = price + widget.catagoryPrice;
+        itemsList[itemIndex]['itemPrice'] = updatedPrice;
+      });
+    } else {
+      itemsList.add(newItem);
+    }
+    String updateJsonString = jsonEncode(itemsList);
+    await prefs.setString('myItemsList', updateJsonString);
+
+    // List<Map<String, dynamic>> itemsMergedListNew = List<Map<String, dynamic>>.from(itemsMergedList);
+    // itemsMergedListNew.add(newItem);
+
+    // itemsList.addAll(itemsMergedListNew);
+
+    // addToCartItems();
+    // setState(() {});
   }
 
   @override
@@ -155,8 +213,8 @@ class _AddToCardScreenState extends State<AddToCardScreen> {
                                             builder: (context) =>
                                                 VideoPlayScreen(
                                                     videoUrl:
-                                                        widget.catagoryImages[
-                                                            index]['url'])));
+                                                    widget.catagoryImages[
+                                                    index]['url'])));
                                   },
                                   icon: Icon(
                                     Icons.play_circle_outline_outlined,
@@ -277,11 +335,8 @@ class _AddToCardScreenState extends State<AddToCardScreen> {
                     ),
                   ),
                   SizedBox(
-                    height: 25,
+                    height: 15,
                   ),
-                  Spacer(),
-
-                  Spacer(),
                 ],
               ),
             )

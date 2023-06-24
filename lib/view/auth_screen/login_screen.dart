@@ -1,5 +1,7 @@
 import 'package:dialogs/dialogs/message_dialog.dart';
 import 'package:dialogs/dialogs/progress_dialog.dart';
+import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/connectivity/connectivity.dart';
@@ -33,9 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isChecked = false;
   bool _isVendor = false;
   bool _isCustomer = true;
-  String ? name;
+  String? name;
   late AppDio dio;
   AppLogger Logger = AppLogger();
+  var bearrer;
 
   GlobalKey<FormState> formKey = GlobalKey();
   TextEditingController _emailController = TextEditingController();
@@ -198,6 +201,41 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: 15,
                           controller: _passwordController),
                       SizeBoxHeight4(),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //     AppCheckBox(
+                      //       hoverColor: AppTheme.appColor,
+                      //       activeColor: Colors.white,
+                      //       borderSidewidth: 0.1,
+                      //       borderSideColor: AppTheme.appColor,
+                      //       focusColor: AppTheme.appColor,
+                      //       checkColor: AppTheme.appColor,
+                      //       value: _isChecked,
+                      //       onChanged: (val) {
+                      //         _handleRememberMe(val!);
+                      //         // saveLoginData(val!);
+                      //       },
+                      //     ),
+                      //     Expanded(
+                      //       child: AppText("Remember me",
+                      //           color: AppTheme.appColor, size: 15),
+                      //     ),
+                      //     // AppText(
+                      //     //   "Forgot password?",
+                      //     //   color: AppTheme.appColor,
+                      //     //   size: 12,
+                      //     //   onTap: () {
+                      //     //     Navigator.push(
+                      //     //         context,
+                      //     //         MaterialPageRoute(
+                      //     //           builder: (context) =>
+                      //     //               SetPasswordByPhoneNumber(),
+                      //     //         ));
+                      //     //   },
+                      //     // ),
+                      //   ],
+                      // ),
                       SizedBox(
                         height: 40,
                       ),
@@ -254,7 +292,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 InkWell(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => SignUp(),));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SignUp(),
+                        ));
                   },
                   child: AppText(
                     "Sign Up",
@@ -311,7 +353,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       var responseData = response.data;
-    
 
       if (loading) {
         loading = false;
@@ -337,7 +378,10 @@ class _LoginScreenState extends State<LoginScreen> {
               prefs.setString(PrefKey.authorization, token);
             }).then((value) {
               if (data['type'] == 1 && _isVendor == true) {
-                replace(HomeNavScreen(type: data['type'],token: token,));
+                replace(HomeNavScreen(
+                  type: data['type'],
+                  token: token,
+                ));
               } else if (data['type'] == 0 && _isCustomer == true) {
                 replace(HomeNavScreen(type: data['type']));
               } else {
@@ -348,6 +392,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     .show(context);
               }
             });
+            getAuthToken(token);
           } else {
             Prefs.getPrefs().then((prefs) async {
               prefs.setString(PrefKey.authorization, token);
@@ -410,6 +455,34 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text = password;
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<void> getAuthToken(String tokenIs) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final fcm_tokenGEt = prefs.getString('fcm_token');
+    print("klfkslkdj$fcm_tokenGEt");
+    final Map<String, dynamic> headers = {
+      'Authorization':
+          'Bearer $tokenIs', // Replace with your actual authorization token
+      // 'Content-Type': 'application/json',
+    };
+    try {
+      final response = await dio.post(
+          options: Options(headers: headers),
+          path: AppUrls.updatefcmToken,
+          data: {
+            'fcm': fcm_tokenGEt,
+          });
+      print("fksjlfks${response.data}");
+      if (response.statusCode == StatusCode.OK) {
+        print("FCM TOKEN HAS BEEN ADDED SUCCESSFULLY $fcm_tokenGEt");
+      }
+    } catch (e, stackTrace) {
+      print('Update FCM token exception: $e\nStack trace: $stackTrace');
+      // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      //   content: Text('FCM Token not updated.'),
+      // ));
     }
   }
 }

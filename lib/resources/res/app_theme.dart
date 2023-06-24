@@ -23,5 +23,6 @@ class AppTheme {
     primarySwatch: Colors.green,
     primaryColor: primaryColor,
     primaryColorDark: primaryColorLite,
+    accentColor: primaryColor,
   );
 }

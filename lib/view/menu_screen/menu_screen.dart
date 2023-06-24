@@ -248,7 +248,6 @@ class _VandorScreenState extends State<VandorScreen> {
                                       lon: widget.long,
                                       businessName: widget.businessName,
                                       location: widget.location,
-                                      vId: widget.id,
                                     ));
                                   },
                                   child: AppText(
@@ -495,6 +494,196 @@ class _VandorScreenState extends State<VandorScreen> {
                     ),
                   ),
                   SizeBoxHeight10(),
+                  // StreamBuilder(
+                  //     stream: _futureGetItems,
+                  //     builder: (context, snapshot) {
+                  //       if (snapshot.data == null) {
+                  //         return Container(
+                  //           height: 300,
+                  //           child: Center(
+                  //             child: CircularProgressIndicator(
+                  //                 color: AppTheme.whiteColor),
+                  //           ),
+                  //         );
+                  //       }
+                  //       var data = snapshot.data![0];
+                  //       return Column(
+                  //         crossAxisAlignment: CrossAxisAlignment.start,
+                  //         children: [
+                  //           if (data["burger"] != null)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Container(
+                  //                   key: _globalKeys[0],
+                  //                   child: AppText(
+                  //                     "Burgers",
+                  //                     size: 18,
+                  //                     color: Colors.white,
+                  //                     bold: FontWeight.w700,
+                  //                   ),
+                  //                 ),
+                  //                 SizeBoxHeight8(),
+                  //                 BurgerBuilder(
+                  //                   itemData: data["burger"],
+                  //                   uType: widget.uType,
+                  //                   vType: widget.vType,
+                  //                 )
+                  //               ],
+                  //             ),
+                  //           SizeBoxHeight8(),
+                  //           if (data["pizza"] != null)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Container(
+                  //                   key: _globalKeys[1],
+                  //                   child: AppText(
+                  //                     "Pizza",
+                  //                     size: 18,
+                  //                     color: Colors.white,
+                  //                     bold: FontWeight.w700,
+                  //                   ),
+                  //                 ),
+                  //                 SizeBoxHeight8(),
+                  //                 PizzaBuilder(
+                  //                     itemData: data["pizza"],
+                  //                     uType: widget.uType,
+                  //                     vType: widget.vType),
+                  //               ],
+                  //             ),
+                  //           SizeBoxHeight8(),
+                  //           if (data["sandwich"] != null)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Container(
+                  //                   key: _globalKeys[2],
+                  //                   child: AppText(
+                  //                     "Sandwich",
+                  //                     size: 18,
+                  //                     color: Colors.white,
+                  //                     bold: FontWeight.w700,
+                  //                   ),
+                  //                 ),
+                  //                 SizeBoxHeight8(),
+                  //                 SandwichBuilder(
+                  //                   itemData: data["sandwich"],
+                  //                   uType: widget.uType,
+                  //                   vType: widget.vType,
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           SizeBoxHeight8(),
+                  //           if (data["fries"] != null)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Container(
+                  //                   key: _globalKeys[3],
+                  //                   child: AppText(
+                  //                     "Fries",
+                  //                     size: 18,
+                  //                     color: Colors.white,
+                  //                     bold: FontWeight.w700,
+                  //                   ),
+                  //                 ),
+                  //                 SizeBoxHeight8(),
+                  //                 FriesBuilder(
+                  //                     itemData: data["fries"],
+                  //                     uType: widget.uType,
+                  //                     vType: widget.vType)
+                  //               ],
+                  //             ),
+                  //           SizeBoxHeight8(),
+                  //           if (data["sauce"] != null)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Container(
+                  //                   key: _globalKeys[4],
+                  //                   child: AppText(
+                  //                     "Sauces",
+                  //                     size: 18,
+                  //                     color: Colors.white,
+                  //                     bold: FontWeight.w700,
+                  //                   ),
+                  //                 ),
+                  //                 SizeBoxHeight8(),
+                  //                 SaucesBuilder(
+                  //                     itemData: data["sauce"],
+                  //                     uType: widget.uType,
+                  //                     vType: widget.vType),
+                  //               ],
+                  //             ),
+                  //           SizeBoxHeight8(),
+                  //           if (data["desert"] != null)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Container(
+                  //                   key: _globalKeys[5],
+                  //                   child: AppText(
+                  //                     "Dessert",
+                  //                     size: 18,
+                  //                     color: Colors.white,
+                  //                     bold: FontWeight.w700,
+                  //                   ),
+                  //                 ),
+                  //                 SizeBoxHeight8(),
+                  //                 DessertBuilder(
+                  //                     itemData: data["desert"],
+                  //                     uType: widget.uType,
+                  //                     vType: widget.vType),
+                  //               ],
+                  //             ),
+                  //           SizeBoxHeight8(),
+                  //           if (data["soft drinks"] != null)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Container(
+                  //                   // height: 100,
+                  //                   // color: Colors.black,
+                  //                   key: _globalKeys[6],
+                  //                   child: AppText(
+                  //                     "Soft Drinks",
+                  //                     size: 18,
+                  //                     color: Colors.white,
+                  //                     bold: FontWeight.w700,
+                  //                   ),
+                  //                 ),
+                  //                 SizeBoxHeight8(),
+                  //                 DrinksBuilder(
+                  //                     itemData: data["soft drinks"],
+                  //                     uType: widget.uType,
+                  //                     vType: widget.vType),
+                  //               ],
+                  //             ),
+                  //           SizeBoxHeight8(),
+                  //           if (data["others"] != null)
+                  //             Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Container(
+                  //                   key: _globalKeys[7],
+                  //                   child: AppText(
+                  //                     "Others",
+                  //                     size: 18,
+                  //                     color: Colors.white,
+                  //                     bold: FontWeight.w700,
+                  //                   ),
+                  //                 ),
+                  //                 SizeBoxHeight8(),
+                  //                 OthersBuilder(
+                  //                     itemData: data["product"],
+                  //                     uType: widget.uType,
+                  //                     vType: widget.vType),
+                  //               ],
+                  //             ),
+                  //         ],
+                  //       );
+                  //     }),
                   StreamBuilder<List<dynamic>>(
                     stream: _futureGetItems,
                     builder: (context, snapshot) {

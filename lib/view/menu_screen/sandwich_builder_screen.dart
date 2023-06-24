@@ -4,7 +4,7 @@ import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
-import 'package:jingle_street/view/menu_screen/add_to_card_screen.dart';
+import 'package:jingle_street/view/buy_screen/add_to_card_screen.dart';
 import 'package:jingle_street/view/menu_screen/detail_edit_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
@@ -58,7 +58,7 @@ class _SandwichBuilderState extends State<SandwichBuilder> {
                           ));
                     }
                   : () {
-                    Navigator.push(
+                      Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => AddToCardScreen(
@@ -71,7 +71,7 @@ class _SandwichBuilderState extends State<SandwichBuilder> {
                               itemId: widget.itemData[i]["id"],
                             ),
                           ));
-                  },
+                    },
               child: Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -162,7 +162,6 @@ class _SandwichBuilderState extends State<SandwichBuilder> {
                                 size: 11,
                                 color: AppTheme.ratingYellowColor,
                               ),
-                              
                             ],
                           )
                         ]),
