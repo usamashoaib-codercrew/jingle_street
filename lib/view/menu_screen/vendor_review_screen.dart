@@ -82,6 +82,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
   }
 
   void showReviewDialog(BuildContext context) {
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -136,7 +137,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // print("ratings_get ${reviewData.length}");
+    print("ratings_get ${widget.vId}");
 
     Size size = MediaQuery.of(context).size;
     return Scaffold(
@@ -317,7 +318,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                           SizeBoxHeight10(),
                           ListView.builder(
                               scrollDirection: Axis.vertical,
-                              itemCount: visibleItemCount,
+                              itemCount:   reviewData.length<5 ? reviewData.length :visibleItemCount,
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               itemBuilder: ((context, index) {
