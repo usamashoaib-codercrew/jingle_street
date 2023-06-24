@@ -82,7 +82,6 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
   }
 
   void showReviewDialog(BuildContext context) {
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -318,7 +317,9 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                           SizeBoxHeight10(),
                           ListView.builder(
                               scrollDirection: Axis.vertical,
-                              itemCount:   reviewData.length<5 ? reviewData.length :visibleItemCount,
+                              itemCount: reviewData.length < 5
+                                  ? reviewData.length
+                                  : visibleItemCount,
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               itemBuilder: ((context, index) {
@@ -386,13 +387,14 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                       null
                                                   ? Row(
                                                       children: [
-                                                        AppText(
-                                                          "${reviewData[index]["review"]}"
-                                                              .toCapitalize(),
-                                                          size: 14,
-                                                          bold: FontWeight.w400,
-                                                          color:
-                                                              AppTheme.appColor,
+                                                        Container(width: 45.w,
+                                                          child: AppText(
+                                                            "${reviewData[index]["review"]}",
+                                                            size: 14,
+                                                            bold: FontWeight.w400,
+                                                            color:
+                                                                AppTheme.appColor,
+                                                          ),
                                                         ),
                                                         Spacer(),
                                                         Visibility(

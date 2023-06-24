@@ -249,6 +249,5 @@ class _SettingScreenState extends State<SettingScreen> {
     await Prefs.remove(PrefKey.id);
     await Prefs.remove(PrefKey.verified);
     await Prefs.remove(PrefKey.profile);
-    await Prefs.remove('fcm_token');
   }
 }
