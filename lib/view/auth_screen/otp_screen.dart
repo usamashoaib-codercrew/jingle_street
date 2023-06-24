@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:dialogs/dialogs/message_dialog.dart';
 import 'package:dialogs/dialogs/progress_dialog.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
@@ -20,6 +21,7 @@ import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import 'package:jingle_street/view/auth_screen/login_screen.dart';
 import 'package:jingle_street/view/home_screen/home_nav_screen.dart';
 import 'package:req_fun/req_fun.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -74,7 +76,10 @@ class _OtpScreenState extends State<OtpScreen> {
       backgroundColor: AppTheme.appColor,
       appBar: ReusableAppBar(BackButton: false),
       body: Padding(
-        padding: EdgeInsets.only(left: 12, right: 12, bottom: MediaQuery.of(context).size.height * 0.06),
+        padding: EdgeInsets.only(
+            left: 12,
+            right: 12,
+            bottom: MediaQuery.of(context).size.height * 0.06),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -296,6 +301,9 @@ class _OtpScreenState extends State<OtpScreen> {
             prefs.setString(PrefKey.email, data['email'] ?? "");
             prefs.setInt(PrefKey.type, data['type']);
             prefs.setInt(PrefKey.verified, data['verified']);
+            var token = prefs.getString('fcm_token');
+            print("lkajsdljflskdjl$token");
+            getAuthToken(token!);
           }).then((value) {
             replace(HomeNavScreen(type: data['type']));
           });
@@ -488,5 +496,33 @@ class _OtpScreenState extends State<OtpScreen> {
 
   clearUserData() async {
     await Prefs.remove(PrefKey.authorization);
+  }
+
+  Future<void> getAuthToken(String tokenIs) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final fcm_tokenGEt = prefs.getString('fcm_token');
+    print("klfkslkdj$fcm_tokenGEt");
+    final Map<String, dynamic> headers = {
+      'Authorization':
+          'Bearer $tokenIs', // Replace with your actual authorization token
+      // 'Content-Type': 'application/json',
+    };
+    try {
+      final response = await dio.post(
+          options: Options(headers: headers),
+          path: AppUrls.updatefcmToken,
+          data: {
+            'fcm': fcm_tokenGEt,
+          });
+      print("fksjlfks${response.data}");
+      if (response.statusCode == StatusCode.OK) {
+        print("FCM TOKEN HAS BEEN ADDED SUCCESSFULLY $fcm_tokenGEt");
+      }
+    } catch (e, stackTrace) {
+      print('Update FCM token exception: $e\nStack trace: $stackTrace');
+      // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      //   content: Text('FCM Token not updated.'),
+      // ));
+    }
   }
 }

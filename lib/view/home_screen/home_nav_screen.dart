@@ -23,14 +23,11 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       bodyList: [
         GoogleMapScreen(type: widget.type,token: widget.token),
         NotificationScreen(),
-        // CartConfirmOrderScreen(),
-        Text(""),
         SettingScreen(type: widget.type,name: widget.name, ),
       ],
       iconData: [
         Icons.home,
         Icons.notifications_none,
-        Icons.shopping_cart_outlined,
         Icons.settings,
       ],
     );
