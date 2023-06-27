@@ -18,8 +18,10 @@ class AppUrls {
   static final String searchHasTag = "/api/searchvendor";
   static final String updateStatusCode = "/api/updatestatus";
   static final String addReview = "/api/review";
-  static final String getVenderreviews= "/api/getvendorreviews";
-  static final String replyComments= "/api/reply";
-  static final String updatefcmToken= "/api/updatefcm";
+  static final String getVenderreviews = "/api/getvendorreviews";
+  static final String replyComments = "/api/reply";
+  static final String updatefcmToken = "/api/updatefcm";
+  static final String followVendor = "/api/bookmarkvendor";
+  static final String getNotify = "/api/getnotifications";
 
 }

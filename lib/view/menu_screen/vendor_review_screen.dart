@@ -565,7 +565,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                   children: [
                                                     Container(
                                                       height: 110,
-                                                      width: 220,
+                                                      width: 55.w,
                                                       color: Colors.white,
                                                       child: AppField(
                                                         hintText: "Reply",

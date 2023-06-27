@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:jingle_street/config/app_urls.dart';
+import 'package:jingle_street/config/connectivity/connectivity.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
 import 'package:jingle_street/config/functions/navigator_functions.dart';
 import 'package:jingle_street/config/functions/provider.dart';
@@ -64,6 +65,7 @@ class VandorScreen extends StatefulWidget {
   final id;
   final uType;
   final location;
+  final follow;
 
   VandorScreen(
       {super.key,
@@ -77,7 +79,8 @@ class VandorScreen extends StatefulWidget {
       this.uType,
       this.location,
       this.businessHours,
-      this.bio});
+      this.bio,
+      this.follow});
 
   @override
   State<VandorScreen> createState() => _VandorScreenState();
@@ -88,8 +91,10 @@ class _VandorScreenState extends State<VandorScreen> {
   bool isDone = true;
   AppLogger Logger = AppLogger();
   late AppDio dio;
+  bool loading = false;
   // var finalData;
   late Stream<List<dynamic>> _futureGetItems;
+  bool isFollowing = false;
 
   @override
   void initState() {
@@ -121,7 +126,19 @@ class _VandorScreenState extends State<VandorScreen> {
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
           actions: [
-            widget.uType == 0 ? Icon(Icons.favorite_border_outlined,color: AppTheme.appColor) : SizedBox(),
+            widget.uType == 0
+                ? widget.follow || isFollowing == true
+                    ? Icon(
+                        Icons.favorite_rounded,
+                        color: AppTheme.appColor,
+                      )
+                    : InkWell(
+                        onTap: () {
+                          connectivity(context);
+                        },
+                        child: Icon(Icons.favorite_border_outlined,
+                            color: AppTheme.appColor))
+                : SizedBox(),
             SizedBox(width: 20),
           ],
           centerTitle: true,
@@ -180,10 +197,6 @@ class _VandorScreenState extends State<VandorScreen> {
                   );
                 },
               ),
-              // child: Image.network(
-              //   "${widget.photo}",
-              //   fit: BoxFit.cover,
-              // ),
             ),
             SizeBoxHeight4(),
             Padding(
@@ -494,196 +507,6 @@ class _VandorScreenState extends State<VandorScreen> {
                     ),
                   ),
                   SizeBoxHeight10(),
-                  // StreamBuilder(
-                  //     stream: _futureGetItems,
-                  //     builder: (context, snapshot) {
-                  //       if (snapshot.data == null) {
-                  //         return Container(
-                  //           height: 300,
-                  //           child: Center(
-                  //             child: CircularProgressIndicator(
-                  //                 color: AppTheme.whiteColor),
-                  //           ),
-                  //         );
-                  //       }
-                  //       var data = snapshot.data![0];
-                  //       return Column(
-                  //         crossAxisAlignment: CrossAxisAlignment.start,
-                  //         children: [
-                  //           if (data["burger"] != null)
-                  //             Column(
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Container(
-                  //                   key: _globalKeys[0],
-                  //                   child: AppText(
-                  //                     "Burgers",
-                  //                     size: 18,
-                  //                     color: Colors.white,
-                  //                     bold: FontWeight.w700,
-                  //                   ),
-                  //                 ),
-                  //                 SizeBoxHeight8(),
-                  //                 BurgerBuilder(
-                  //                   itemData: data["burger"],
-                  //                   uType: widget.uType,
-                  //                   vType: widget.vType,
-                  //                 )
-                  //               ],
-                  //             ),
-                  //           SizeBoxHeight8(),
-                  //           if (data["pizza"] != null)
-                  //             Column(
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Container(
-                  //                   key: _globalKeys[1],
-                  //                   child: AppText(
-                  //                     "Pizza",
-                  //                     size: 18,
-                  //                     color: Colors.white,
-                  //                     bold: FontWeight.w700,
-                  //                   ),
-                  //                 ),
-                  //                 SizeBoxHeight8(),
-                  //                 PizzaBuilder(
-                  //                     itemData: data["pizza"],
-                  //                     uType: widget.uType,
-                  //                     vType: widget.vType),
-                  //               ],
-                  //             ),
-                  //           SizeBoxHeight8(),
-                  //           if (data["sandwich"] != null)
-                  //             Column(
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Container(
-                  //                   key: _globalKeys[2],
-                  //                   child: AppText(
-                  //                     "Sandwich",
-                  //                     size: 18,
-                  //                     color: Colors.white,
-                  //                     bold: FontWeight.w700,
-                  //                   ),
-                  //                 ),
-                  //                 SizeBoxHeight8(),
-                  //                 SandwichBuilder(
-                  //                   itemData: data["sandwich"],
-                  //                   uType: widget.uType,
-                  //                   vType: widget.vType,
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //           SizeBoxHeight8(),
-                  //           if (data["fries"] != null)
-                  //             Column(
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Container(
-                  //                   key: _globalKeys[3],
-                  //                   child: AppText(
-                  //                     "Fries",
-                  //                     size: 18,
-                  //                     color: Colors.white,
-                  //                     bold: FontWeight.w700,
-                  //                   ),
-                  //                 ),
-                  //                 SizeBoxHeight8(),
-                  //                 FriesBuilder(
-                  //                     itemData: data["fries"],
-                  //                     uType: widget.uType,
-                  //                     vType: widget.vType)
-                  //               ],
-                  //             ),
-                  //           SizeBoxHeight8(),
-                  //           if (data["sauce"] != null)
-                  //             Column(
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Container(
-                  //                   key: _globalKeys[4],
-                  //                   child: AppText(
-                  //                     "Sauces",
-                  //                     size: 18,
-                  //                     color: Colors.white,
-                  //                     bold: FontWeight.w700,
-                  //                   ),
-                  //                 ),
-                  //                 SizeBoxHeight8(),
-                  //                 SaucesBuilder(
-                  //                     itemData: data["sauce"],
-                  //                     uType: widget.uType,
-                  //                     vType: widget.vType),
-                  //               ],
-                  //             ),
-                  //           SizeBoxHeight8(),
-                  //           if (data["desert"] != null)
-                  //             Column(
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Container(
-                  //                   key: _globalKeys[5],
-                  //                   child: AppText(
-                  //                     "Dessert",
-                  //                     size: 18,
-                  //                     color: Colors.white,
-                  //                     bold: FontWeight.w700,
-                  //                   ),
-                  //                 ),
-                  //                 SizeBoxHeight8(),
-                  //                 DessertBuilder(
-                  //                     itemData: data["desert"],
-                  //                     uType: widget.uType,
-                  //                     vType: widget.vType),
-                  //               ],
-                  //             ),
-                  //           SizeBoxHeight8(),
-                  //           if (data["soft drinks"] != null)
-                  //             Column(
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Container(
-                  //                   // height: 100,
-                  //                   // color: Colors.black,
-                  //                   key: _globalKeys[6],
-                  //                   child: AppText(
-                  //                     "Soft Drinks",
-                  //                     size: 18,
-                  //                     color: Colors.white,
-                  //                     bold: FontWeight.w700,
-                  //                   ),
-                  //                 ),
-                  //                 SizeBoxHeight8(),
-                  //                 DrinksBuilder(
-                  //                     itemData: data["soft drinks"],
-                  //                     uType: widget.uType,
-                  //                     vType: widget.vType),
-                  //               ],
-                  //             ),
-                  //           SizeBoxHeight8(),
-                  //           if (data["others"] != null)
-                  //             Column(
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Container(
-                  //                   key: _globalKeys[7],
-                  //                   child: AppText(
-                  //                     "Others",
-                  //                     size: 18,
-                  //                     color: Colors.white,
-                  //                     bold: FontWeight.w700,
-                  //                   ),
-                  //                 ),
-                  //                 SizeBoxHeight8(),
-                  //                 OthersBuilder(
-                  //                     itemData: data["product"],
-                  //                     uType: widget.uType,
-                  //                     vType: widget.vType),
-                  //               ],
-                  //             ),
-                  //         ],
-                  //       );
-                  //     }),
                   StreamBuilder<List<dynamic>>(
                     stream: _futureGetItems,
                     builder: (context, snapshot) {
@@ -971,6 +794,64 @@ class _VandorScreenState extends State<VandorScreen> {
           );
         },
       );
+    }
+  }
+
+  connectivity(context) {
+    internet(
+      connected: () {
+        favouriteVendor(context);
+      },
+      notConnected: () {
+        MessageDialog(
+                title: "Connectivity!",
+                message:
+                    "It looks like you are not connected to the internet. Please check your internet connection and try again...")
+            .show(context);
+      },
+    );
+  }
+
+  favouriteVendor(context) async {
+    ProgressDialog progressDialog = ProgressDialog(
+      context: context,
+      backgroundColor: Colors.white,
+      textColor: AppTheme.appColor,
+    );
+    progressDialog.show();
+    loading = true;
+    var response;
+
+    try {
+      response = await dio
+          .post(path: AppUrls.followVendor, data: {'vendor_id': widget.id});
+
+      var responseData = response.data;
+
+      if (loading) {
+        loading = false;
+        progressDialog.dismiss();
+      }
+
+      if (response.statusCode == StatusCode.OK) {
+        var resData = responseData;
+
+        print("resData$resData");
+        setState(() {
+          isFollowing = true;
+        });
+      }
+    } catch (e, s) {
+      print(e);
+      print(s);
+
+      if (loading) {
+        Navigator.pop(context);
+        loading = false;
+      }
+
+      MessageDialog(title: e.toString(), message: response["message"])
+          .show(context);
     }
   }
 }

@@ -43,21 +43,23 @@ class Vendor {
   final int statusCode;
   final id;
   final user_id;
+  final following;
 
   Vendor(
       {required this.id,
-        required this.location,
-        required this.type,
-        required this.statusCode,
-        required this.bio,
-        required this.businessName,
-        required this.address,
-        required this.profilepic,
-        required this.businesshours,
-        required this.hashtags,
-        required this.latitude,
-        required this.longitude,
-        required this.user_id});
+      required this.location,
+      required this.type,
+      required this.statusCode,
+      required this.bio,
+      required this.businessName,
+      required this.address,
+      required this.profilepic,
+      required this.businesshours,
+      required this.hashtags,
+      required this.latitude,
+      required this.longitude,
+      required this.user_id, 
+      this.following});
 }
 
 class GoogleMapScreen extends StatefulWidget {
@@ -80,7 +82,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 
   //CustomInfoWindowController used in Function _onMapCreated to deploy InfoWindow on Map.
   CustomInfoWindowController _customInfoWindowController =
-  CustomInfoWindowController();
+      CustomInfoWindowController();
 
   //Controller for GoogleMapController to initialize the Map.
   Completer<GoogleMapController> _controller = Completer();
@@ -155,12 +157,13 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   //googleAPIkey us
   //String googleAPiKey = "AIzaSyAtEldlQYJiBycTyxcSJeZAqXsBWd8PTFU";
 
-  getdatafromsharedPrefs() async{
+  getdatafromsharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     user_id = prefs.getString(PrefKey.id);
     storedLat = prefs.getDouble(PrefKey.lat)!;
     storedLong = prefs.getDouble(PrefKey.long)!;
   }
+
   @override
   void initState() {
     dio = AppDio(context);
@@ -209,531 +212,543 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
         MediaQuery.of(context).devicePixelRatio;
     return hasInternet
         ? Scaffold(
-      key: _scaffoldKey,
-      endDrawer: FutureBuilder(
-          future: _futureSortedNearestVendors,
-          builder: (context, snapshot) {
-            if (snapshot.data == null) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else {
-              return Drawer(
-                backgroundColor: AppTheme.whiteColor,
-                width: screenWidth,
-                child: Column(
-                  children: [
-                    AppBar(
-                      actions: [],
-                      elevation: 5,
-                      toolbarHeight: 70,
-                      shadowColor: Colors.black,
+            key: _scaffoldKey,
+            endDrawer: FutureBuilder(
+                future: _futureSortedNearestVendors,
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return Drawer(
                       backgroundColor: AppTheme.whiteColor,
-                      centerTitle: true,
-                      title: AppText("Nearest Vendor",
-                          size: 27,
-                          color: AppTheme.appColor,
-                          bold: FontWeight.bold),
-                    ),
-                    Expanded(
-                      flex: 8,
-                      child: Container(
-                        height: screenHeight,
-                        width: screenWidth,
-                        child: ListView.builder(
-                            padding: EdgeInsets.all(2),
-                            physics: ScrollPhysics(),
-                            scrollDirection: Axis.vertical,
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) {
-                              Vendor vendor = snapshot.data![index];
-                              print("checking ${snapshot.data!.length}");
-                              return vendor.statusCode == 1
-                                  ? GestureDetector(
-                                onTap: () => Navigator.of(context)
-                                    .push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      VandorScreen(
-                                        location: vendor.location,
-                                        businessHours:
-                                        vendor.businesshours,
-                                        businessName:
-                                        vendor.businessName,
-                                        address: vendor.address,
-                                        photo: vendor.profilepic,
-                                        vType: vendor.type,
-                                        id: vendor.id,
-                                        lat: vendor.latitude + 0.0,
-                                        long: vendor.longitude + 0.0,
-                                        uType: vendor.user_id == user_id
-                                            ? 1
-                                            : 0,
-                                        bio: vendor.bio,
-                                      ),
-                                )),
-                                child: Padding(
-                                    padding:  EdgeInsets.only(
-                                      left: 20,
-                                      right: 20,
-                                      top: 2.h,),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: vendor.type == 1
-                                              ? Colors.green
-                                              : Colors.blue,
-                                          borderRadius:
-                                          BorderRadius.all(
-                                              Radius.circular(
-                                                  15))),
-                                      padding: EdgeInsets.only(
-                                        top: 3.h,
-                                        right: 15,
-                                        left: 20,),
-                                      height: screenHeight * 0.2,
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceEvenly,
-                                              children: [
-                                                Container(
-                                                  height:
-                                                  screenHeight *
-                                                      0.14,
-                                                  width: screenWidth *
-                                                      0.29,
-                                                  decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius
-                                                          .all(Radius
-                                                          .circular(
-                                                          15)),
-                                                      image: DecorationImage(
-                                                          fit: BoxFit
-                                                              .fill,
-                                                          image: NetworkImage(
-                                                              vendor
-                                                                  .profilepic))),
+                      width: screenWidth,
+                      child: Column(
+                        children: [
+                          AppBar(
+                            actions: [],
+                            elevation: 5,
+                            toolbarHeight: 70,
+                            shadowColor: Colors.black,
+                            backgroundColor: AppTheme.whiteColor,
+                            centerTitle: true,
+                            title: AppText("Nearest Vendor",
+                                size: 27,
+                                color: AppTheme.appColor,
+                                bold: FontWeight.bold),
+                          ),
+                          Expanded(
+                            flex: 8,
+                            child: Container(
+                              height: screenHeight,
+                              width: screenWidth,
+                              child: ListView.builder(
+                                  padding: EdgeInsets.all(2),
+                                  physics: ScrollPhysics(),
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: snapshot.data!.length,
+                                  itemBuilder: (context, index) {
+                                    Vendor vendor = snapshot.data![index];
+                                    print("checking ${snapshot.data!.length}");
+                                    return vendor.statusCode == 1
+                                        ? GestureDetector(
+                                            onTap: () => Navigator.of(context)
+                                                .push(MaterialPageRoute(
+                                              builder: (context) =>
+                                                  VandorScreen(
+                                                location: vendor.location,
+                                                businessHours:
+                                                    vendor.businesshours,
+                                                businessName:
+                                                    vendor.businessName,
+                                                address: vendor.address,
+                                                photo: vendor.profilepic,
+                                                vType: vendor.type,
+                                                id: vendor.id,
+                                                lat: vendor.latitude + 0.0,
+                                                long: vendor.longitude + 0.0,
+                                                uType: vendor.user_id == user_id
+                                                    ? 1
+                                                    : 0,
+                                                bio: vendor.bio,
+                                                follow: vendor.following,
+                                            
+                                              ),
+                                            )),
+                                            child: Padding(
+                                                padding: EdgeInsets.only(
+                                                  left: 20,
+                                                  right: 20,
+                                                  top: 2.h,
                                                 ),
-                                                SizeBoxWidth16(),
-                                                Expanded(
-                                                    flex: 2,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                      color: vendor.type == 1
+                                                          ? Colors.green
+                                                          : Colors.blue,
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  15))),
+                                                  padding: EdgeInsets.only(
+                                                    top: 3.h,
+                                                    right: 15,
+                                                    left: 20,
+                                                  ),
+                                                  height: screenHeight * 0.2,
+                                                  child: SingleChildScrollView(
                                                     child: Column(
-                                                      mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceAround,
-                                                      crossAxisAlignment:
-                                                      CrossAxisAlignment
-                                                          .start,
                                                       children: [
-                                                        AppText(
-                                                          vendor
-                                                              .businessName,
-                                                          size: 18.sp,
-                                                          bold: FontWeight
-                                                              .bold,
-                                                          color: AppTheme
-                                                              .whiteColor,
-                                                        ),
-                                                        SizeBoxHeight8(),
-                                                        AppText(
-                                                          vendor
-                                                              .hashtags,
-                                                          size: 12.sp,
-                                                          bold: FontWeight
-                                                              .bold,
-                                                          color: AppTheme
-                                                              .whiteColor,
-                                                        ),
-                                                        SizeBoxHeight8(),
-                                                        vendor.type ==
-                                                            1
-                                                            ? AppText(
-                                                          "Mobile Vendor",
-                                                          size:
-                                                          12.sp,
-                                                          bold:
-                                                          FontWeight.normal,
-                                                          color:
-                                                          AppTheme.whiteColor,
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          children: [
+                                                            Container(
+                                                              height:
+                                                                  screenHeight *
+                                                                      0.14,
+                                                              width:
+                                                                  screenWidth *
+                                                                      0.29,
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              15)),
+                                                                  image: DecorationImage(
+                                                                      fit: BoxFit
+                                                                          .fill,
+                                                                      image: NetworkImage(
+                                                                          vendor
+                                                                              .profilepic))),
+                                                            ),
+                                                            SizeBoxWidth16(),
+                                                            Expanded(
+                                                                flex: 2,
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceAround,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    AppText(
+                                                                      vendor
+                                                                          .businessName,
+                                                                      size:
+                                                                          18.sp,
+                                                                      bold: FontWeight
+                                                                          .bold,
+                                                                      color: AppTheme
+                                                                          .whiteColor,
+                                                                    ),
+                                                                    SizeBoxHeight8(),
+                                                                    AppText(
+                                                                      vendor
+                                                                          .hashtags,
+                                                                      size:
+                                                                          12.sp,
+                                                                      bold: FontWeight
+                                                                          .bold,
+                                                                      color: AppTheme
+                                                                          .whiteColor,
+                                                                    ),
+                                                                    SizeBoxHeight8(),
+                                                                    vendor.type ==
+                                                                            1
+                                                                        ? AppText(
+                                                                            "Mobile Vendor",
+                                                                            size:
+                                                                                12.sp,
+                                                                            bold:
+                                                                                FontWeight.normal,
+                                                                            color:
+                                                                                AppTheme.whiteColor,
+                                                                          )
+                                                                        : AppText(
+                                                                            "Stationary Vendor",
+                                                                            size:
+                                                                                12.sp,
+                                                                            bold:
+                                                                                FontWeight.normal,
+                                                                            color:
+                                                                                AppTheme.whiteColor,
+                                                                          ),
+                                                                  ],
+                                                                )),
+                                                            Icon(
+                                                              Icons
+                                                                  .arrow_forward_ios,
+                                                              color: AppTheme
+                                                                  .whiteColor,
+                                                            )
+                                                          ],
                                                         )
-                                                            : AppText(
-                                                          "Stationary Vendor",
-                                                          size:
-                                                          12.sp,
-                                                          bold:
-                                                          FontWeight.normal,
-                                                          color:
-                                                          AppTheme.whiteColor,
-                                                        ),
                                                       ],
-                                                    )),
-                                                Icon(
-                                                  Icons
-                                                      .arrow_forward_ios,
-                                                  color: AppTheme
-                                                      .whiteColor,
-                                                )
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
+                                                    ),
+                                                  ),
+                                                )),
+                                          )
+                                        : SizedBox();
+                                  }),
+                            ),
+                          ),
+                          Expanded(flex: 1, child: Container())
+                        ],
+                      ),
+                    );
+                  }
+                }),
+            drawerScrimColor: Colors.transparent,
+            body: Stack(
+              children: [
+                StreamBuilder(
+                  stream: _getVendor(),
+                  builder: (context, AsyncSnapshot snapshot) {
+                    if (snapshot.data == null) {
+                      return Center(
+                        child:
+                            CircularProgressIndicator(color: AppTheme.appColor),
+                      );
+                    } else {
+                      return _currentPosition == null && storedLat == null
+                          ? Center(
+                              child: Column(
+                              children: [
+                                SizedBox(
+                                  height: screenHeight * 0.500,
+                                ),
+                                Text(
+                                    "You have not Enable Location from \nApp settings, Please goto App settings\nto enable it, restart App. \nto use service for first time",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
                                     )),
-                              )
-                                  : SizedBox();
-                            }),
-                      ),
-                    ),
-                    Expanded(flex: 1, child: Container())
-                  ],
-                ),
-              );
-            }
-          }),
-      drawerScrimColor: Colors.transparent,
-      body: Stack(
-        children: [
-          StreamBuilder(
-            stream: _getVendor(),
-            builder: (context, AsyncSnapshot snapshot) {
-              if (snapshot.data == null) {
-                return Center(
-                  child:
-                  CircularProgressIndicator(color: AppTheme.appColor),
-                );
-              } else {
-                return _currentPosition == null && storedLat == null
-                    ? Center(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: screenHeight * 0.500,
-                        ),
-                        Text("You have not Enable Location from \nApp settings, Please goto App settings\nto enable it, restart App. \nto use service for first time",textAlign: TextAlign.center,style: TextStyle(fontSize: 16,)),
-                      ],
-                    ))
-                    : GoogleMap(
-                  onTap: (position) {
-                    _customInfoWindowController.hideInfoWindow!();
-                  },
-                  onCameraMove: (position) {
-                    _customInfoWindowController.onCameraMove!();
-                  },
-                  zoomControlsEnabled: false,
-                  mapType: MapType.normal,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  buildingsEnabled: true,
-                  markers: snapshot.data,
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(
-                        _currentPosition == null
-                            ? storedLat! + 0.0
-                            : _currentPosition!.latitude + 0.0,
-                        _currentPosition == null
-                            ? storedLong! + 0.0
-                            : _currentPosition!.longitude + 0.0),
-                    zoom: 18.0,
-                  ),
-                );
-              }
-            },
-          ),
-          //this is used to create custom window in google map screen
-          CustomInfoWindow(
-            controller: _customInfoWindowController,
-            height: 31.h,
-            width: 50.w,
-            offset: (40 / offset.height) * offset.height,
-          ),
-          SingleChildScrollView(
-            child: Padding(
-              padding:
-              const EdgeInsets.only(top: 40.0, left: 24, right: 24),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SearchField(
-                        onSubmitted: (value) async {
-                          if (value.contains("#")) {
-                            setState(() {
-                              _hashtagVisible = true;
-                            });
-                            _searchHashTagFinalResult =
-                                _searchHasTags(searchValue: value);
-                          } else if (value.contains("")) {
-                            setState(() {
-                              _hashtagVisible = false;
-                            });
-                          }
-                          if (value.contains(value)) {
-                            await _searchVendorsLocation(
-                                searchText: value);
-                            //here this Code Search the location of the Shop when we provide Address in SearchField
-                            GoogleMapController mapController =
-                            await _controller.future;
-
-                            mapController.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(
-                                      target: LatLng(
-                                          gotIt!['lat'], gotIt!['lng']),
-                                      zoom: 15.0),
-                                ));
-                          }
-                        },
-                        borderRadius: BorderRadius.circular(50),
-                        widthSearchBar: 200,
-                        hintText: "Let's find local vendors!",
-                        textEditingController: _searchController,
-                        hintColor: Color.fromRGBO(247, 0, 0, 0.5),
-                        fontSize: 15,
-                      ),
-
-                      // isLoadingImage? const CircularProgressIndicator():
-                      widget.type == 1
-                          ? StreamBuilder(
-                        stream: _futureGetpicture,
-                        builder: (context, snapshot) {
-                          if (snapshot.data == null) {
-                            return Container(
-                              height: (155 / circleSize) * 100,
-                              width: (155 / circleSize) * 100,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      width: 1,
-                                      color: AppTheme.appColor)),
-                              child: ClipRRect(
-                                borderRadius:
-                                BorderRadius.circular(20),
-                                child: Image(
-                                    fit: BoxFit.fill,
-                                    image: AssetImage(
-                                        "assets/images/default.png")),
+                              ],
+                            ))
+                          : GoogleMap(
+                              onTap: (position) {
+                                _customInfoWindowController.hideInfoWindow!();
+                              },
+                              onCameraMove: (position) {
+                                _customInfoWindowController.onCameraMove!();
+                              },
+                              zoomControlsEnabled: false,
+                              mapType: MapType.normal,
+                              myLocationEnabled: true,
+                              myLocationButtonEnabled: false,
+                              buildingsEnabled: true,
+                              markers: snapshot.data,
+                              onMapCreated: _onMapCreated,
+                              initialCameraPosition: CameraPosition(
+                                target: LatLng(
+                                    _currentPosition == null
+                                        ? storedLat! + 0.0
+                                        : _currentPosition!.latitude + 0.0,
+                                    _currentPosition == null
+                                        ? storedLong! + 0.0
+                                        : _currentPosition!.longitude + 0.0),
+                                zoom: 18.0,
                               ),
                             );
-                          } else if (snapshot.hasData &&
-                              snapshot.data != null &&
-                              snapshot.data!.isNotEmpty) {
-                            var data = snapshot.data?[0] ?? "";
-                            return data != null
-                                ? ProfileButton(
-                              height: 125,
-                              width: 125,
-                              pic: data != null && data != ""
-                                  ? data["profilepic"] ?? ""
-                                  : "http://3.13.220.3/default.png",
-                              border: true,
-                              onTap: () async {
-                                if (data == "") {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) {
-                                          return VandorScreen(
-                                            businessHours: "",
-                                            businessName: "",
-                                            address: "",
-                                            location: "",
-                                            photo:
-                                            "http://3.13.220.3/default.png",
-                                            // vType: 1,
-                                            id: "",
-                                            lat: 0.0,
-                                            long: 0.0,
-                                            uType: 1,
-                                            bio:
-                                            "bio is Not mentioned",
-                                          );
-                                        }),
-                                  );
-                                } else {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) {
-                                          return VandorScreen(
-                                            businessHours: data[
-                                            "businesshours"] ??
-                                                "",
-                                            businessName: data[
-                                            "businessname"] ??
-                                                "",
-                                            address:
-                                            data["address"] ??
-                                                "",
-                                            location: data[
-                                            "location"] ??
-                                                "",
-                                            photo: data[
-                                            "profilepic"] ??
-                                                "",
-                                            vType: data['type'],
-                                            id: data["id"],
-                                            lat:
-                                            data["latitude"] +
-                                                0.0,
-                                            long: data[
-                                            "longitude"] +
-                                                0.0,
-                                            uType:
-                                            data["user_id"] ==
-                                                user_id
-                                                ? 1
-                                                : 0,
-                                            bio: data["bio"] ??
-                                                "bio is Not mentioned",
-                                          );
-                                        }),
-                                  );
+                    }
+                  },
+                ),
+                //this is used to create custom window in google map screen
+                CustomInfoWindow(
+                  controller: _customInfoWindowController,
+                  height: 31.h,
+                  width: 50.w,
+                  offset: (40 / offset.height) * offset.height,
+                ),
+                SingleChildScrollView(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(top: 40.0, left: 24, right: 24),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SearchField(
+                              onSubmitted: (value) async {
+                                if (value.contains("#")) {
+                                  setState(() {
+                                    _hashtagVisible = true;
+                                  });
+                                  _searchHashTagFinalResult =
+                                      _searchHasTags(searchValue: value);
+                                } else if (value.contains("")) {
+                                  setState(() {
+                                    _hashtagVisible = false;
+                                  });
+                                }
+                                if (value.contains(value)) {
+                                  await _searchVendorsLocation(
+                                      searchText: value);
+                                  //here this Code Search the location of the Shop when we provide Address in SearchField
+                                  GoogleMapController mapController =
+                                      await _controller.future;
+
+                                  mapController.animateCamera(
+                                      CameraUpdate.newCameraPosition(
+                                    CameraPosition(
+                                        target: LatLng(
+                                            gotIt!['lat'], gotIt!['lng']),
+                                        zoom: 15.0),
+                                  ));
                                 }
                               },
-                            )
-                                : ProfileButton(
-                                height: 125,
-                                width: 125,
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .push(MaterialPageRoute(
-                                    builder: (context) =>
-                                        VendorProfile(),
-                                  ));
-                                });
-                          }
-                          return Container(
-                            height: (155 / circleSize) * 100,
-                            width: (155 / circleSize) * 100,
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    width: 1,
-                                    color: AppTheme.appColor)),
-                            child: ClipRRect(
-                              borderRadius:
-                              BorderRadius.circular(20),
-                              child: Image(
-                                  fit: BoxFit.fill,
-                                  image: AssetImage(
-                                      "assets/images/default.png")),
+                              borderRadius: BorderRadius.circular(50),
+                              widthSearchBar: 200,
+                              hintText: "Let's find local vendors!",
+                              textEditingController: _searchController,
+                              hintColor: Color.fromRGBO(247, 0, 0, 0.5),
+                              fontSize: 15,
                             ),
-                          );
-                        },
-                      )
-                          : SizedBox(),
-                    ],
+
+                            // isLoadingImage? const CircularProgressIndicator():
+                            widget.type == 1
+                                ? StreamBuilder(
+                                    stream: _futureGetpicture,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.data == null) {
+                                        return Container(
+                                          height: (155 / circleSize) * 100,
+                                          width: (155 / circleSize) * 100,
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                  width: 1,
+                                                  color: AppTheme.appColor)),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            child: Image(
+                                                fit: BoxFit.fill,
+                                                image: AssetImage(
+                                                    "assets/images/default.png")),
+                                          ),
+                                        );
+                                      } else if (snapshot.hasData &&
+                                          snapshot.data != null &&
+                                          snapshot.data!.isNotEmpty) {
+                                        var data = snapshot.data?[0] ?? "";
+                                        return data != null
+                                            ? ProfileButton(
+                                                height: 125,
+                                                width: 125,
+                                                pic: data != null && data != ""
+                                                    ? data["profilepic"] ?? ""
+                                                    : "http://3.13.220.3/default.png",
+                                                border: true,
+                                                onTap: () async {
+                                                  if (data == "") {
+                                                    Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                          builder: (context) {
+                                                        return VandorScreen(
+                                                          businessHours: "",
+                                                          businessName: "",
+                                                          address: "",
+                                                          location: "",
+                                                          photo:
+                                                              "http://3.13.220.3/default.png",
+                                                          // vType: 1,
+                                                          id: "",
+                                                          lat: 0.0,
+                                                          long: 0.0,
+                                                          uType: 1,
+                                                          bio:
+                                                              "bio is Not mentioned",
+                                                        );
+                                                      }),
+                                                    );
+                                                  } else {
+                                                    Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                          builder: (context) {
+                                                        return VandorScreen(
+                                                          businessHours: data[
+                                                                  "businesshours"] ??
+                                                              "",
+                                                          businessName: data[
+                                                                  "businessname"] ??
+                                                              "",
+                                                          address:
+                                                              data["address"] ??
+                                                                  "",
+                                                          location: data[
+                                                                  "location"] ??
+                                                              "",
+                                                          photo: data[
+                                                                  "profilepic"] ??
+                                                              "",
+                                                          vType: data['type'],
+                                                          id: data["id"],
+                                                          lat:
+                                                              data["latitude"] +
+                                                                  0.0,
+                                                          long: data[
+                                                                  "longitude"] +
+                                                              0.0,
+                                                          uType:
+                                                              data["user_id"] ==
+                                                                      user_id
+                                                                  ? 1
+                                                                  : 0,
+                                                          bio: data["bio"] ??
+                                                              "bio is Not mentioned",
+                                                        );
+                                                      }),
+                                                    );
+                                                  }
+                                                },
+                                              )
+                                            : ProfileButton(
+                                                height: 125,
+                                                width: 125,
+                                                onTap: () {
+                                                  Navigator.of(context)
+                                                      .push(MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        VendorProfile(),
+                                                  ));
+                                                });
+                                      }
+                                      return Container(
+                                        height: (155 / circleSize) * 100,
+                                        width: (155 / circleSize) * 100,
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                                width: 1,
+                                                color: AppTheme.appColor)),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          child: Image(
+                                              fit: BoxFit.fill,
+                                              image: AssetImage(
+                                                  "assets/images/default.png")),
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : SizedBox(),
+                          ],
+                        ),
+                        Stack(
+                          children: [
+                            Visibility(
+                                visible: _hashtagVisible,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _hashtagVisible = false;
+                                      _searchController.text = "";
+                                    });
+                                  },
+                                  child: Container(
+                                      color: Colors.transparent,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.8,
+                                      width: MediaQuery.of(context).size.width),
+                                )),
+                            SearchHashTag(
+                              type: widget.type,
+                              hashtagVisible: _hashtagVisible,
+                              stream: _searchHashTagFinalResult,
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
-                  Stack(
-                    children: [
-                      Visibility(
-                          visible: _hashtagVisible,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _hashtagVisible = false;
-                                _searchController.text = "";
-                              });
-                            },
-                            child: Container(
-                                color: Colors.transparent,
-                                height:
-                                MediaQuery.of(context).size.height *
-                                    0.8,
-                                width: MediaQuery.of(context).size.width),
-                          )),
-                      SearchHashTag(
-                        type: widget.type,
-                        hashtagVisible: _hashtagVisible,
-                        stream: _searchHashTagFinalResult,
-                      ),
-                    ],
-                  )
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 35.h,
+                  child: Container(
+                      decoration: BoxDecoration(
+                          color: AppTheme.appColor,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(30),
+                              bottomLeft: Radius.circular(30))),
+                      height: 60,
+                      width: 50,
+                      child: GestureDetector(
+                          onHorizontalDragEnd: (DragEndDetails details) {
+                            if (details.primaryVelocity! < 0) {
+                              _scaffoldKey.currentState!.openEndDrawer();
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                  scale: 0.04 * screenWidth,
+                                  image: AssetImage(
+                                      "assets/images/slideLeftToShowVendorsIcon.png")),
+                            ),
+                            width: 50,
+                            height: 50,
+                          ))),
+                ),
+              ],
+            ),
+            floatingActionButton: Padding(
+              padding: const EdgeInsets.only(bottom: 80.0),
+              child: FloatingActionButton(
+                backgroundColor: AppTheme.appColor,
+                child: Icon(Icons.my_location),
+                onPressed: () async {
+                  try {
+                    Geolocator.getCurrentPosition(
+                            desiredAccuracy: LocationAccuracy.high)
+                        .then(
+                      (Position result) async {
+                        GoogleMapController mapController =
+                            await _controller.future;
+                        mapController.animateCamera(
+                          CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                                target: LatLng(result.latitude + 0.0,
+                                    result.longitude + 0.0),
+                                zoom: 18.0),
+                          ),
+                        );
+                      },
+                    );
+                  } catch (e) {
+                    print("_________$e");
+                  }
+                },
+              ),
+            ),
+          )
+        : Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Internet Connection Weak'),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        initState();
+                      });
+                    },
+                    child: Text('Retry'),
+                  ),
                 ],
               ),
             ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 35.h,
-            child: Container(
-                decoration: BoxDecoration(
-                    color: AppTheme.appColor,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        bottomLeft: Radius.circular(30))),
-                height: 60,
-                width: 50,
-                child: GestureDetector(
-                    onHorizontalDragEnd: (DragEndDetails details) {
-                      if (details.primaryVelocity! < 0) {
-                        _scaffoldKey.currentState!.openEndDrawer();
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                            scale: 0.04 * screenWidth,
-                            image: AssetImage(
-                                "assets/images/slideLeftToShowVendorsIcon.png")),
-                      ),
-                      width: 50,
-                      height: 50,
-                    ))),
-          ),
-        ],
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80.0),
-        child: FloatingActionButton(
-          backgroundColor: AppTheme.appColor,
-          child: Icon(Icons.my_location),
-          onPressed: () async {
-            try {
-              Geolocator.getCurrentPosition(
-                  desiredAccuracy: LocationAccuracy.high)
-                  .then(
-                    (Position result) async {
-                  GoogleMapController mapController =
-                  await _controller.future;
-                  mapController.animateCamera(
-                    CameraUpdate.newCameraPosition(
-                      CameraPosition(
-                          target: LatLng(result.latitude + 0.0,
-                              result.longitude + 0.0),
-                          zoom: 18.0),
-                    ),
-                  );
-                },
-              );
-            } catch (e) {
-              print("_________$e");
-            }
-          },
-        ),
-      ),
-    )
-        : Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Internet Connection Weak'),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  initState();
-                });
-              },
-              child: Text('Retry'),
-            ),
-          ],
-        ),
-      ),
-    );
+          );
   }
 
   //function that get user_id from shared preferences
@@ -804,7 +819,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
         await Geolocator.openLocationSettings();
         await ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Location permissions are denied')));
-
       }
       if (permission == LocationPermission.always) {
         return true;
@@ -823,9 +837,8 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 
 //Function that generate lat long for first time to use it on google map.
   _getCurrentPosition() async {
-    SharedPreferences prefs =await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-
 //       if(prefs.getDouble(PrefKey.lat) != 0.0)
 //         {
 //           setState(() {
@@ -839,8 +852,8 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 //           });
 //         }
 
-      Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high).then((value) {
+      Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+          .then((value) {
         prefs.setDouble(PrefKey.lat, value.latitude + 0.0);
         prefs.setDouble(PrefKey.long, value.longitude + 0.0);
         _currentPosition = value;
@@ -939,20 +952,21 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
               latitude: vendorData["latitude"] + 0.0,
               longitude: vendorData["longitude"] + 0.0,
               statusCode: vendorData["status"],
+              following: vendorData["is_following"]
             )
           ]);
 
           sortedVendors.sort((a, b) {
             double distanceToA = calculateDistance(
-              storedLat??0.0,
-              storedLong??0.0,
+              storedLat ?? 0.0,
+              storedLong ?? 0.0,
               a.latitude + 0.0,
               a.longitude + 0.0,
             );
 
             double distanceToB = calculateDistance(
-              storedLat??0.0,
-              storedLong??0.0,
+              storedLat ?? 0.0,
+              storedLong ?? 0.0,
               b.latitude,
               b.longitude,
             );
@@ -965,16 +979,17 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
           // }
         }
       }
-    } catch (e, s) {};
+    } catch (e, s) {}
+    ;
     return sortedVendors;
   }
 
   double calculateDistance(
-      double startLatitude,
-      double startLongitude,
-      double endLatitude,
-      double endLongitude,
-      ) {
+    double startLatitude,
+    double startLongitude,
+    double endLatitude,
+    double endLongitude,
+  ) {
     const int earthRadius = 6371; // Radius of the Earth in kilometers
 
     double lat1 = degreesToRadians(startLatitude);
@@ -1049,6 +1064,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                   businessHours: marker["businesshours"] ??
                                       "business hours Not Mentioned",
                                   bio: marker["bio"] ?? "Bio is not mentioned",
+                                  follow: marker['is_following'],
                                 ),
                               ));
                             },
@@ -1079,6 +1095,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                   businessHours: marker["businesshours"] ??
                                       "business hours not mentioned",
                                   bio: marker["bio"] ?? "Bio is not mentioned",
+                                  follow: marker['is_following'],
                                 ),
                               ));
                             },
@@ -1086,6 +1103,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                             businessName: marker["businessname"],
                             businessHours: marker["businesshours"] ??
                                 "Business Hours Not mentioned",
+                                
                             address: marker["address"],
                             hashTags: marker["hashtags"],
                             imageUrl: imageData),
@@ -1096,15 +1114,15 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                 icon: await MarkerIcon.downloadResizePictureCircle(imageData,
                     addBorder: true,
                     borderColor:
-                    marker["type"] == 0 ? Colors.blue : Colors.green,
+                        marker["type"] == 0 ? Colors.blue : Colors.green,
                     borderSize: 5,
                     size: markerSize(context).toInt()),
                 markerId: MarkerId("${marker["id"]}"),
                 position: marker["type"] == 1
                     ? LatLng(
-                    marker["latitude"] + 0.0, marker["longitude"] + 0.0)
+                        marker["latitude"] + 0.0, marker["longitude"] + 0.0)
                     : LatLng(
-                    marker["latitude"] + 0.0, marker["longitude"] + 0.0),
+                        marker["latitude"] + 0.0, marker["longitude"] + 0.0),
               );
             } else {
               markers = Marker(markerId: MarkerId("1"), visible: false);
@@ -1191,7 +1209,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
       Map<String, dynamic> data = jsonDecode(response.body);
       if (data['status'] == 'OK') {
         Map<String, dynamic> location =
-        data['results'][0]['geometry']['location'];
+            data['results'][0]['geometry']['location'];
         setState(() {
           gotIt = location;
         });
