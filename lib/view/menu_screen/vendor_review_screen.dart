@@ -52,6 +52,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
   late AppDio dio;
   var reviewData;
   int visibleItemCount = 5;
+  double normalizedRating = 0.0;
 
   // bool replyVisibility = false;
   Widget _buildStar(int index, StateSetter stateSetter) {
@@ -136,7 +137,6 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("ratings_get ${widget.vId}");
 
     Size size = MediaQuery.of(context).size;
     return Scaffold(
@@ -252,31 +252,35 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                           ),
                         ),
                   SizedBox(height: 15),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.star,
-                        size: 16,
-                        color: AppTheme.ratingYellowColor,
-                      ),
-                      SizeBoxWidth8(),
-                      AppText(
-                        "3.8",
-                        color: AppTheme.appColor,
-                        bold: FontWeight.w700,
-                        size: 20,
-                      )
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 25),
-                    child: AppText(
-                      "100+ people rated",
-                      size: 14,
-                      color: AppTheme.appColor,
-                      bold: FontWeight.w400,
-                    ),
-                  ),
+                  normalizedRating != 0
+                      ? Row(
+                          children: [
+                            Icon(
+                              Icons.star,
+                              size: 20,
+                              color: Colors.yellow,
+                            ),
+                            SizeBoxWidth8(),
+                            AppText(
+                              "$normalizedRating".substring(0, 3),
+                              color: AppTheme.appColor,
+                              bold: FontWeight.w700,
+                              size: 20,
+                            )
+                          ],
+                        )
+                      : SizedBox(),
+                  reviewData != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 25),
+                          child: AppText(
+                            _getRatingCountText(reviewData.length),
+                            size: 14,
+                            color: AppTheme.appColor,
+                            bold: FontWeight.w400,
+                          ),
+                        )
+                      : SizedBox(),
                   SizeBoxHeight12(),
                 ],
               ),
@@ -323,10 +327,14 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               itemBuilder: ((context, index) {
+                                int reversedIndex =
+                                    reviewData.length - 1 - index;
+                                Map<String, dynamic> review =
+                                    reviewData[reversedIndex];
                                 return GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      replyVisibility![index] = false;
+                                      replyVisibility![reversedIndex] = false;
                                     });
                                   },
                                   child: Container(
@@ -352,14 +360,14 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
                                               AppText(
-                                                "${reviewData[index]["name"]}"
+                                                "${review["name"]}"
                                                     .toCapitalize(),
                                                 size: 16,
                                                 bold: FontWeight.w700,
                                                 color: AppTheme.appColor,
                                               ),
                                               buildTimeAgoTextWidget(
-                                                  reviewData[index]
+                                                  reviewData[reversedIndex]
                                                       ["updatedAt"]),
                                             ],
                                           ),
@@ -367,14 +375,11 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                           Row(
                                             children: [
                                               for (int i = 0;
-                                                  i <
-                                                      reviewData[index]
-                                                          ["rating"];
+                                                  i < review["rating"];
                                                   i++)
                                                 Icon(Icons.star,
                                                     color: Colors.yellow),
-                                              for (int i = reviewData[index]
-                                                      ["rating"];
+                                              for (int i = review["rating"];
                                                   i < 5;
                                                   i++)
                                                 Icon(Icons.star,
@@ -383,32 +388,33 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                           ),
                                           SizeBoxHeight10(),
                                           widget.uType == 1
-                                              ? reviewData[index]["comment"] ==
-                                                      null
+                                              ? review["comment"] == null
                                                   ? Row(
                                                       children: [
-                                                        Container(width: 45.w,
+                                                        Container(
+                                                          width: 45.w,
                                                           child: AppText(
-                                                            "${reviewData[index]["review"]}",
+                                                            "${review["review"]}",
                                                             size: 14,
-                                                            bold: FontWeight.w400,
-                                                            color:
-                                                                AppTheme.appColor,
+                                                            bold:
+                                                                FontWeight.w400,
+                                                            color: AppTheme
+                                                                .appColor,
                                                           ),
                                                         ),
                                                         Spacer(),
                                                         Visibility(
                                                           visible:
                                                               !replyVisibility![
-                                                                  index],
+                                                                  reversedIndex],
                                                           child:
                                                               GestureDetector(
                                                             onTap: () {
                                                               setState(() {
                                                                 replyVisibility![
-                                                                        index] =
+                                                                        reversedIndex] =
                                                                     !replyVisibility![
-                                                                        index];
+                                                                        reversedIndex];
                                                               });
                                                             },
                                                             child: Container(
@@ -452,7 +458,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                               .start,
                                                       children: [
                                                         AppText(
-                                                          "${reviewData[index]["review"]}"
+                                                          "${review["review"]}"
                                                               .toCapitalize(),
                                                           size: 14,
                                                           bold: FontWeight.w400,
@@ -485,7 +491,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                                 height: 7,
                                                               ),
                                                               AppText(
-                                                                "${reviewData[index]["comment"]}"
+                                                                "${review["comment"]}"
                                                                     .toCapitalize(),
                                                                 size: 14,
                                                                 bold: FontWeight
@@ -503,7 +509,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     AppText(
-                                                      "${reviewData[index]["review"]}"
+                                                      "${review["review"]}"
                                                           .toCapitalize(),
                                                       size: 14,
                                                       bold: FontWeight.w400,
@@ -512,9 +518,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                     SizedBox(
                                                       height: 10,
                                                     ),
-                                                    reviewData[index]
-                                                                ["comment"] ==
-                                                            null
+                                                    review["comment"] == null
                                                         ? SizedBox()
                                                         : Padding(
                                                             padding:
@@ -540,7 +544,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                                   height: 5,
                                                                 ),
                                                                 AppText(
-                                                                  "${reviewData[index]["comment"]}"
+                                                                  "${review["comment"]}"
                                                                       .toCapitalize(),
                                                                   size: 14,
                                                                   bold:
@@ -556,7 +560,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                 ),
                                           SizeBoxHeight16(),
                                           Visibility(
-                                            visible: replyVisibility![index],
+                                            visible: replyVisibility![reversedIndex],
                                             child: Container(
                                               height: 13.h,
                                               child: Row(
@@ -580,7 +584,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                             AppTheme.appColor,
                                                         textEditingController:
                                                             _replyFromVendor![
-                                                                index],
+                                                                reversedIndex],
                                                       ),
                                                     ),
                                                     SizedBox(
@@ -604,11 +608,11 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                                           child: IconButton(
                                                               onPressed: () {
                                                                 if (_replyFromVendor![
-                                                                        index]
+                                                                        reversedIndex]
                                                                     .text
                                                                     .isNotEmpty) {
                                                                   commentsReply(
-                                                                      index);
+                                                                      reversedIndex);
                                                                   FocusScope.of(
                                                                           context)
                                                                       .unfocus();
@@ -627,9 +631,9 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
 
                                                                 setState(() {
                                                                   replyVisibility![
-                                                                          index] =
+                                                                          reversedIndex] =
                                                                       !replyVisibility![
-                                                                          index];
+                                                                          reversedIndex];
                                                                 });
                                                               },
                                                               icon: Icon(
@@ -655,12 +659,10 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                   if (remainigItems >= 5) {
                                     setState(() {
                                       visibleItemCount += 5;
-                                      print("visible$visibleItemCount");
                                     });
                                   } else {
                                     setState(() {
                                       visibleItemCount += remainigItems;
-                                      print("visible$visibleItemCount");
                                     });
                                   }
                                 },
@@ -908,7 +910,8 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
   ///////////////////////////////////  vendor reviews api ///////////////////////////////////
 
   sendReview() async {
-    print("1111$_rating");
+    
+
     ProgressDialog progressDialog = ProgressDialog(
       context: context,
       backgroundColor: Colors.white,
@@ -927,7 +930,6 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
         },
       );
 
-      print("1245${response.data}");
 
       if (loading) {
         loading = false;
@@ -965,11 +967,21 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
 
       if (response.statusCode == StatusCode.OK) {
         var data = response.data;
+        var totalRating = data["data"];
         setState(() {
           reviewData = data["data"];
-          print("review$reviewData");
           loading = false;
         });
+        int sumOfRatings = 0;
+
+        for (var totalR in totalRating) {
+          int totalRR = totalR["rating"];
+          sumOfRatings += totalRR;
+        }
+        double averageRating = sumOfRatings / reviewData.length;
+
+        normalizedRating = (averageRating / 5) * 5;
+
       } else {
         loading = false;
 
@@ -988,7 +1000,6 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
     }
     stateChangeFuntion();
   }
-
   ///////////////////////////////////////////////
 
   Widget buildTimeAgoTextWidget(int timestamp) {
@@ -1047,7 +1058,6 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
 
         getVenderReviews();
 
-        print("1111$data");
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Something went wrong, please try again!'),
@@ -1061,6 +1071,19 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
       setState(() {
         loading = false;
       });
+    }
+  }
+
+  ///////////////////////////////
+  String _getRatingCountText(int count) {
+    if (count >= 1000) {
+      int thousands = (count ~/ 1000);
+      return "${thousands}k+ people rated";
+    } else if (count >= 100) {
+      int hundreds = (count ~/ 100);
+      return "${hundreds}00+ people rated";
+    } else {
+      return "${count} people rated";
     }
   }
 }

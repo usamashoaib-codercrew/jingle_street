@@ -38,7 +38,6 @@ class _DrinksBuilderState extends State<DrinksBuilder> {
             child: InkWell(
               onTap: widget.uType == 1
                   ? () {
-                      // print( widget.itemData[i]["id"]);
 
                       Navigator.push(
                           context,

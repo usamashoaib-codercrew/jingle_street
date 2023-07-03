@@ -104,11 +104,7 @@ class _AddToCardScreenState extends State<AddToCardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // print("lckbckba ${widget.getData}");
-    print("${widget.itemId}bbannnsdfkslldfbsdkbfxkkfbkdxbskbjdfb");
-    print("setting_items_pic ${widget.catagoryImages[0]['url']}");
-    print("setting_items_name ${widget.catagoryName}");
-    print("setting_items_price ${widget.catagoryPrice}");
+
     var size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppTheme.appColor,

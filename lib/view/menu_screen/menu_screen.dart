@@ -110,7 +110,6 @@ class _VandorScreenState extends State<VandorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("vtype..${widget.vType}");
     bool myBoolean = Provider.of<BoolProvider>(context).myBoolean;
     final widthScreen = MediaQuery.of(context).size.width;
 
@@ -134,6 +133,7 @@ class _VandorScreenState extends State<VandorScreen> {
                       )
                     : InkWell(
                         onTap: () {
+
                           connectivity(context);
                         },
                         child: Icon(Icons.favorite_border_outlined,
@@ -261,6 +261,7 @@ class _VandorScreenState extends State<VandorScreen> {
                                       lon: widget.long,
                                       businessName: widget.businessName,
                                       location: widget.location,
+                                      vId: widget.id,
                                     ));
                                   },
                                   child: AppText(
@@ -836,7 +837,6 @@ class _VandorScreenState extends State<VandorScreen> {
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
 
-        print("resData$resData");
         setState(() {
           isFollowing = true;
         });

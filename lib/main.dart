@@ -31,9 +31,7 @@ FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void notificationTapBackground(NotificationResponse notificationResponse) {
-  print('notification(${notificationResponse.id}) action tapped: '
-      '${notificationResponse.actionId} with'
-      ' payload: ${notificationResponse.payload}');
+ 
   if (notificationResponse.input?.isNotEmpty ?? false) {
     print(
         'notification action tapped with input: ${notificationResponse.input}');

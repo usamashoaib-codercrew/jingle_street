@@ -24,7 +24,6 @@ class BurgerBuilder extends StatefulWidget {
 class _BurgerBuilderState extends State<BurgerBuilder> {
   @override
   Widget build(BuildContext context) {
-    print("utype${widget.uType}...............");
     Size size = MediaQuery.of(context).size;
     return Container(
       height: 140,

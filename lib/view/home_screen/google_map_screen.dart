@@ -250,7 +250,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                   itemCount: snapshot.data!.length,
                                   itemBuilder: (context, index) {
                                     Vendor vendor = snapshot.data![index];
-                                    print("checking ${snapshot.data!.length}");
                                     return vendor.statusCode == 1
                                         ? GestureDetector(
                                             onTap: () => Navigator.of(context)
@@ -602,6 +601,8 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                                                   : 0,
                                                           bio: data["bio"] ??
                                                               "bio is Not mentioned",
+                                                              follow: data["is_following"],
+
                                                         );
                                                       }),
                                                     );
@@ -770,7 +771,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
-        print("........${resData['status']}");
 
         if (resData['status'] == true) {
           var data = responseData['data']['vendorprofile'] ?? [];
@@ -778,7 +778,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
           setState(() {
             _vendorType = data["type"];
           });
-          print("asdasd${_vendorType}");
         }
       }
     } catch (e, s) {
@@ -924,7 +923,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 //this function sorts data of Vendor Nearst along with the current position of the person. and shows Nearest Vendors List Details on Drawer()
   Future<List<dynamic>> _SortedVendorsTobeShownOnDrawer() async {
     Geolocator.getCurrentPosition();
-    print("this API has been hit");
 
     var response;
     List<dynamic> sortedVendors = [];

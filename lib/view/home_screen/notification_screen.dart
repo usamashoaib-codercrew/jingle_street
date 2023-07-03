@@ -8,6 +8,7 @@ import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
+import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:sizer/sizer.dart';
 
@@ -55,32 +56,39 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     child: Column(
                     
                       children: [
-                        Container(
-                          // color: Colors.black,
-                          height: 70,
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundImage:
-                                    NetworkImage("${resData[index]["image"]}"),
-                                radius: 25,
-                              ),
-                              SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  AppText(
-                                    "${resData[index]["message"]}",
-                                    ellipsis: true,
-                                    size: 20,
-                                    bold: FontWeight.w400,
-                                  ),
-                                  SizeBoxHeight10(),
-                                   formatTimestampWidget(timestamp: resData[index]["updatedAt"]),
-                                ],
-                              ),
-                            ],
+                        InkWell(
+                          onTap: () {
+                          // VendorReviewScreen(
+
+                          // );
+                          },
+                          child: Container(
+                            // color: Colors.black,
+                            height: 70,
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundImage:
+                                      NetworkImage("${resData[index]["image"]}"),
+                                  radius: 25,
+                                ),
+                                SizedBox(width: 10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    AppText(
+                                      "${resData[index]["message"]}",
+                                      ellipsis: true,
+                                      size: 20,
+                                      bold: FontWeight.w400,
+                                    ),
+                                    SizeBoxHeight10(),
+                                     formatTimestampWidget(timestamp: resData[index]["updatedAt"]),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         Divider(
@@ -114,7 +122,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       if (response.statusCode == StatusCode.OK) {
         resData = responseData["data"];
         setState(() {});
-        print("resData$resData");
       }
     } catch (e, s) {
       print(e);

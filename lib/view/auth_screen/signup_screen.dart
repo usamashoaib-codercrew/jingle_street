@@ -128,7 +128,6 @@ class _SignUpState extends State<SignUp> {
                                   onChanged: (value) {
                                     setState(() {
                                       type = value!;
-                                      // print('customer:${value}');
                                     });
                                   },
                                 ),
@@ -139,7 +138,6 @@ class _SignUpState extends State<SignUp> {
                                   onChanged: (value) {
                                     setState(() {
                                       type = value!;
-                                      // print('Vendor:${type}');
                                     });
                                   },
                                 ),
@@ -251,7 +249,6 @@ class _SignUpState extends State<SignUp> {
                                 // e.g. +1234567890
                                 phone = number.phoneNumber;
                                 setState(() {});
-                                print(phone);
                               },
                               inputDecoration: InputDecoration(
                                 isDense: true,
@@ -360,13 +357,10 @@ class _SignUpState extends State<SignUp> {
                               children: [
                                 AppButton(
                                   onPressed: () {
-                                    print("......u...$type");
                                     if (type == 0 || type == 1) {
                                       _continue(context);
 
-                                      print(".........$type");
                                     } else {
-                                      print("....r.....$type");
                                       MessageDialog(
                                               title: 'Select',
                                               message:
@@ -424,9 +418,7 @@ class _SignUpState extends State<SignUp> {
   _continue(context) {
     if (formKey.currentState!.validate()) {
       connectivity(context);
-      print("---->> ok");
     } else {
-      print("---->> not ok");
     }
   }
 
