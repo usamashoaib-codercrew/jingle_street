@@ -9,7 +9,6 @@ import 'package:jingle_street/config/functions/navigator_functions.dart';
 import 'package:jingle_street/config/functions/provider.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/config/logger/app_logger.dart';
-import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
@@ -92,28 +91,51 @@ class _VandorScreenState extends State<VandorScreen> {
   AppLogger Logger = AppLogger();
   late AppDio dio;
   bool loading = false;
+
   // var finalData;
   late Stream<List<dynamic>> _futureGetItems;
   bool isFollowing = false;
-
+@override
+  void dispose() {
+    super.dispose();
+  }
   @override
   void initState() {
     dio = AppDio(context);
-
     Logger.init();
-    super.initState();
+    checkIfUserIsFollowing();
     _futureGetItems = getVendorItems();
-  }
+    super.initState();
 
+  }
+  checkIfUserIsFollowing()async {
+    var response;
+    try{
+      response = await dio.get(path: AppUrls.is_following,queryParameters: {"vendor_id" : widget.id});
+      var responseData = response.data;
+      if (response.statusCode == StatusCode.OK) {
+        var resData = responseData;
+
+        if (resData['status'] == true) {
+          var data = resData["data"];
+          setState(() {
+            isFollowing = data["following"];
+          });
+        }
+      }
+    }
+    catch(e){
+      print("error${e}");
+    }
+
+  }
   List<bool> isSelectedList =
       List.generate(MenuText.length, (index) => index == 0);
 
   @override
   Widget build(BuildContext context) {
+    print("vtype..${widget.vType}");
     bool myBoolean = Provider.of<BoolProvider>(context).myBoolean;
-    final widthScreen = MediaQuery.of(context).size.width;
-
-    final heightScreen = MediaQuery.of(context).size.height;
     var size = MediaQuery.of(context).size;
 
     if (myBoolean) {
@@ -125,21 +147,24 @@ class _VandorScreenState extends State<VandorScreen> {
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
           actions: [
-            widget.uType == 0
-                ? widget.follow || isFollowing == true
-                    ? Icon(
-                        Icons.favorite_rounded,
-                        color: AppTheme.appColor,
-                      )
-                    : InkWell(
-                        onTap: () {
-
-                          connectivity(context);
-                        },
-                        child: Icon(Icons.favorite_border_outlined,
-                            color: AppTheme.appColor))
-                : SizedBox(),
-            SizedBox(width: 20),
+            widget.uType == 0 ? isFollowing? InkWell(
+                onTap: () {
+                  favouriteVendor(context);
+                },
+                child: Icon(
+                  Icons.favorite_rounded,
+                  color: AppTheme.appColor,
+                )):
+            InkWell(
+                onTap: () {
+                  favouriteVendor(context);
+                },
+                child: Icon(
+                  Icons.favorite_border_outlined,
+                  color: AppTheme.appColor,
+                ),
+            ):SizedBox(),
+            SizedBox(width: 30,)
           ],
           centerTitle: true,
           backgroundColor: AppTheme.whiteColor,
@@ -261,7 +286,6 @@ class _VandorScreenState extends State<VandorScreen> {
                                       lon: widget.long,
                                       businessName: widget.businessName,
                                       location: widget.location,
-                                      vId: widget.id,
                                     ));
                                   },
                                   child: AppText(
@@ -798,20 +822,6 @@ class _VandorScreenState extends State<VandorScreen> {
     }
   }
 
-  connectivity(context) {
-    internet(
-      connected: () {
-        favouriteVendor(context);
-      },
-      notConnected: () {
-        MessageDialog(
-                title: "Connectivity!",
-                message:
-                    "It looks like you are not connected to the internet. Please check your internet connection and try again...")
-            .show(context);
-      },
-    );
-  }
 
   favouriteVendor(context) async {
     ProgressDialog progressDialog = ProgressDialog(
@@ -837,8 +847,15 @@ class _VandorScreenState extends State<VandorScreen> {
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
 
+        print("resData$resData");
         setState(() {
-          isFollowing = true;
+          if(resData["message"] == "Unliked")
+            {
+              isFollowing = false;
+            }
+          else{
+            isFollowing = true;
+          }
         });
       }
     } catch (e, s) {
@@ -854,4 +871,6 @@ class _VandorScreenState extends State<VandorScreen> {
           .show(context);
     }
   }
+
+
 }

@@ -157,8 +157,7 @@ class _VendorProfileEditState extends State<VendorProfileEdit> {
                           InternationalPhoneNumberInput(
                             keyboardType: TextInputType.number,
                             onInputChanged: (PhoneNumber number) {
-                              print(number.phoneNumber);
-                              // e.g. +1234567890
+                            
                             },
                             inputDecoration: const InputDecoration(
                               isDense: true,

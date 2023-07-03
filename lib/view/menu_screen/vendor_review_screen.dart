@@ -260,7 +260,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                               size: 20,
                               color: Colors.yellow,
                             ),
-                            SizeBoxWidth8(),
+                            SizeBoxWidth4(),
                             AppText(
                               "$normalizedRating".substring(0, 3),
                               color: AppTheme.appColor,
@@ -272,7 +272,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                       : SizedBox(),
                   reviewData != null
                       ? Padding(
-                          padding: const EdgeInsets.only(left: 25),
+                          padding: const EdgeInsets.only(left: 23),
                           child: AppText(
                             _getRatingCountText(reviewData.length),
                             size: 14,
@@ -658,13 +658,14 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
                                       reviewData.length - visibleItemCount;
                                   if (remainigItems >= 5) {
                                     setState(() {
-                                      visibleItemCount += 5;
-                                    });
-                                  } else {
-                                    setState(() {
                                       visibleItemCount += remainigItems;
                                     });
-                                  }
+                                  } 
+                                  // else {
+                                  //   setState(() {
+                                  //     visibleItemCount += remainigItems;
+                                  //   });
+                                  // }
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.only(
