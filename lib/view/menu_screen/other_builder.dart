@@ -38,6 +38,7 @@ class _OthersBuilderState extends State<OthersBuilder> {
             child: InkWell(
               onTap: widget.uType == 1
                   ? () {
+                      // print( widget.itemData[i]["id"]);
 
                       Navigator.push(
                           context,

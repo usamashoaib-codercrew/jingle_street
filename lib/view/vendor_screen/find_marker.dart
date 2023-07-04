@@ -134,6 +134,7 @@ class _MapScreenState extends State<MapScreen> {
       if (data['status'] == 'OK') {
         Map<String, dynamic> location =
         data['results'][0]['geometry']['location'];
+        print("123810923 ${location}");
         setState(() {
           gotIt = location;
         });

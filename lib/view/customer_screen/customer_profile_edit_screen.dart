@@ -82,6 +82,193 @@ class _CustomerProfileEditState extends State<CustomerProfileEdit> {
                       ),
                     ],
                   ),
+                  // Column(
+                  //   children: [
+                  //     DottedBorder(
+                  //         color: Colors.white,
+                  //         dashPattern: [10, 5],
+                  //         borderType: BorderType.Circle,
+                  //         padding: EdgeInsets.all(6),
+                  //         child: Container(
+                  //           height: 110,
+                  //           width: 110,
+                  //           decoration: BoxDecoration(
+                  //               borderRadius: BorderRadius.circular(70),
+                  //               border: Border.all(
+                  //                 color: Colors.white,
+                  //                 width: 1,
+                  //               )),
+                  //         )),
+                  //     SizeBoxHeight12(),
+                  //     Container(
+                  //       height: 30,
+                  //       width: 120,
+                  //       decoration: BoxDecoration(
+                  //           borderRadius: BorderRadius.circular(6),
+                  //           color: Colors.white),
+                  //       child: Padding(
+                  //         padding: const EdgeInsets.only(left: 7.0, right: 7),
+                  //         child: InkWell(
+                  //           onTap: () async {
+                  //             bool isPermissionGranted =
+                  //                 await requestPhotosPermission();
+                  //             if (isPermissionGranted) {
+                  //               print("yes..............");
+                  //               AlertDialog(
+                  //                 actions: [Icon(Icons.abc)],
+                  //               );
+                  //             } else {
+                  //               print("noo..............");
+
+                  //               AlertDialog(
+                  //                 actions: [Icon(Icons.cancel_outlined)],
+                  //               );
+                  //             }
+                  //           },
+                  //           //   showDialog(
+                  //           //       context: context,
+                  //           //       builder: (context) {
+                  //           //         return SimpleDialog(
+                  //           //           shape: RoundedRectangleBorder(
+                  //           //               borderRadius:
+                  //           //                   BorderRadius.circular(20)),
+                  //           //           contentPadding: EdgeInsets.zero,
+                  //           //           backgroundColor: AppTheme.appColor,
+                  //           //           children: [
+                  //           //             SizeBoxHeight12(),
+                  //           //             Column(
+                  //           //               children: [
+                  //           //                 Row(
+                  //           //                   mainAxisAlignment:
+                  //           //                       MainAxisAlignment.center,
+                  //           //                   children: [
+                  //           //                     Container(
+                  //           //                       child: Image(
+                  //           //                         image: AssetImage(
+                  //           //                           "assets/images/Vector9.png",
+                  //           //                         ),
+                  //           //                         height: 30,
+                  //           //                         width: 30,
+                  //           //                       ),
+                  //           //                     )
+                  //           //                   ],
+                  //           //                 ),
+                  //           //                 SizeBoxHeight16(),
+                  //           //                 RichText(
+                  //           //                   text: TextSpan(
+                  //           //                     children: [
+                  //           //                       TextSpan(
+                  //           //                           text:
+                  //           //                               "Allow Jingle Street to access photos and\n\n           media on your",
+                  //           //                           style: TextStyle(
+                  //           //                               color: AppTheme
+                  //           //                                   .whiteColor)),
+                  //           //                       TextSpan(
+                  //           //                           text: " device?",
+                  //           //                           style: TextStyle(
+                  //           //                               fontWeight:
+                  //           //                                   FontWeight.bold,
+                  //           //                               color: AppTheme
+                  //           //                                   .whiteColor))
+                  //           //                     ],
+                  //           //                   ),
+                  //           //                 ),
+                  //           //                 SizeBoxHeight32(),
+                  //           //                 Container(
+                  //           //                   decoration: BoxDecoration(
+                  //           //                       border: Border(
+                  //           //                     top: BorderSide(
+                  //           //                         width: 2,
+                  //           //                         color:
+                  //           //                             AppTheme.whiteColor),
+                  //           //                   )),
+                  //           //                   child: Row(
+                  //           //                     mainAxisAlignment:
+                  //           //                         MainAxisAlignment
+                  //           //                             .spaceEvenly,
+                  //           //                     children: [
+                  //           //                       InkWell(
+                  //           //                         onTap: () {
+                  //           //                           pop(context);
+                  //           //                         },
+                  //           //                         child: Container(
+                  //           //                           height: 50,
+                  //           //                           width: 150 /
+                  //           //                               size.width *
+                  //           //                               150,
+                  //           //                           child: Center(
+                  //           //                             child: Text(
+                  //           //                               "Don't Allow",
+                  //           //                               style: TextStyle(
+                  //           //                                   color: AppTheme
+                  //           //                                       .whiteColor),
+                  //           //                             ),
+                  //           //                           ),
+                  //           //                         ),
+                  //           //                       ),
+                  //           //                       Container(
+                  //           //                         width: 3,
+                  //           //                         height: 50,
+                  //           //                         decoration: BoxDecoration(
+                  //           //                             border: Border(
+                  //           //                           right: BorderSide(
+                  //           //                               width: 2,
+                  //           //                               color: AppTheme
+                  //           //                                   .whiteColor),
+                  //           //                         )),
+                  //           //                       ),
+                  //           //                       InkWell(
+                  //           //                         onTap: () {
+                  //           //                           pop(context);
+                  //           //                         },
+                  //           //                         child: Container(
+                  //           //                           height: 40,
+                  //           //                           width: 150 /
+                  //           //                               size.width *
+                  //           //                               150,
+                  //           //                           child: Center(
+                  //           //                             child: Text(
+                  //           //                               "Allow",
+                  //           //                               style: TextStyle(
+                  //           //                                   fontWeight:
+                  //           //                                       FontWeight
+                  //           //                                           .bold,
+                  //           //                                   color: AppTheme
+                  //           //                                       .whiteColor),
+                  //           //                             ),
+                  //           //                           ),
+                  //           //                         ),
+                  //           //                       ),
+                  //           //                     ],
+                  //           //                   ),
+                  //           //                 )
+                  //           //               ],
+                  //           //             ),
+                  //           //           ],
+                  //           //         );
+                  //           //       });
+                  //           // },
+                  //           child: Row(
+                  //             children: [
+                  //               AppText(
+                  //                 "Change Image",
+                  //                 color: AppTheme.appColor,
+                  //                 size: 14,
+                  //                 bold: FontWeight.w400,
+                  //               ),
+                  //               SizeBoxWidth8(),
+                  //               Icon(
+                  //                 Icons.camera_alt,
+                  //                 size: 18,
+                  //                 color: AppTheme.appColor,
+                  //               )
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     )
+                  //   ],
+                  // )
                 ],
               ),
               Padding(
@@ -427,5 +614,6 @@ class _CustomerProfileEditState extends State<CustomerProfileEdit> {
     await Prefs.getPrefs().then((prefs) {
       name = prefs.getString(PrefKey.name);
     });
+    // print("...........++++++++.${name}");
   }
 }

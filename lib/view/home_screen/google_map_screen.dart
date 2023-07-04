@@ -4,8 +4,10 @@ import 'dart:io';
 import 'dart:math';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:jingle_street/config/app_urls.dart';
@@ -13,6 +15,7 @@ import 'package:jingle_street/config/dio/app_dio.dart';
 import 'package:jingle_street/config/keys/pref_keys.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/config/logger/app_logger.dart';
+import 'package:jingle_street/model/notifications.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/profile_button.dart';
 import 'package:jingle_street/resources/widgets/fields/search_field.dart';
@@ -23,6 +26,7 @@ import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/hashtag_search.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import 'package:jingle_street/view/menu_screen/menu_screen.dart';
+import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
 import 'package:jingle_street/view/vendor_screen/vendor_profile_screen.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -250,6 +254,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                   itemCount: snapshot.data!.length,
                                   itemBuilder: (context, index) {
                                     Vendor vendor = snapshot.data![index];
+                                    print("checking ${snapshot.data!.length}");
                                     return vendor.statusCode == 1
                                         ? GestureDetector(
                                             onTap: () => Navigator.of(context)
@@ -601,8 +606,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                                                   : 0,
                                                           bio: data["bio"] ??
                                                               "bio is Not mentioned",
-                                                              follow: data["is_following"],
-
                                                         );
                                                       }),
                                                     );
@@ -771,6 +774,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
+        print("........${resData['status']}");
 
         if (resData['status'] == true) {
           var data = responseData['data']['vendorprofile'] ?? [];
@@ -778,6 +782,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
           setState(() {
             _vendorType = data["type"];
           });
+          print("asdasd${_vendorType}");
         }
       }
     } catch (e, s) {
@@ -923,6 +928,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 //this function sorts data of Vendor Nearst along with the current position of the person. and shows Nearest Vendors List Details on Drawer()
   Future<List<dynamic>> _SortedVendorsTobeShownOnDrawer() async {
     Geolocator.getCurrentPosition();
+    print("this API has been hit");
 
     var response;
     List<dynamic> sortedVendors = [];

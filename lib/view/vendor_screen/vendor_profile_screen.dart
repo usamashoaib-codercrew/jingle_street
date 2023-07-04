@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'package:dialogs/dialogs/message_dialog.dart';
 import 'package:dialogs/dialogs/progress_dialog.dart';
@@ -70,6 +71,7 @@ class _VendorProfileState extends State<VendorProfile> {
       });
     }
     catch(e){
+      print("shared Preference Value is empty${e}");
     }
 
   }
@@ -97,6 +99,7 @@ class _VendorProfileState extends State<VendorProfile> {
 
   @override
   Widget build(BuildContext context) {
+    print(" imageUrl: ${AppUrls.baseUrl}${profileImage}");
 
     final widthScreen = MediaQuery.of(context).size.width;
     final heightScreen = MediaQuery.of(context).size.height;
@@ -672,6 +675,7 @@ class _VendorProfileState extends State<VendorProfile> {
           if (data != null) {
             Prefs.getPrefs().then((prefs) async {
               prefs.setString(PrefKey.profile, data);
+              print(".......$data");
               profileImage = prefs.getString(PrefKey.profile);
             });
           }
@@ -714,10 +718,13 @@ class _VendorProfileState extends State<VendorProfile> {
 
   _continue(context) {
     if (globalKey.currentState!.validate()) {
+      print("---->> $type");
       if (type == 0) {
         connectivity(context);
+        print("---->> $type");
       } else if (type == 1) {
         connectivity(context);
+        print("---->> $type");
       } else {
         MessageDialog(title: "Select", message: "Please Select type")
             .show(context);
@@ -760,6 +767,7 @@ class _VendorProfileState extends State<VendorProfile> {
     _loading = true;
     var response;
     var formData;
+    print(".......$lat...........$long");
     formData = FormData.fromMap(
       {
         "businessname": _bNameController.getText(),
@@ -797,6 +805,7 @@ class _VendorProfileState extends State<VendorProfile> {
 
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
+        print("........${resData['status']}");
 
         if (resData['status'] == true) {
           var data = responseData['data'];
@@ -858,6 +867,7 @@ class _VendorProfileState extends State<VendorProfile> {
       }
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
+        print("........${resData['status']}");
 
         if (resData['status'] == true) {
           var data = responseData['data']['vendorprofile']??null;

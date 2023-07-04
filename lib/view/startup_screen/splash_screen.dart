@@ -23,6 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   late int type;
   String token = '';
   String? name;
+  String? id;
 
   int? verified;
   String? phone;
@@ -140,7 +141,7 @@ class _SplashScreenState extends State<SplashScreen> {
   getUserData() async {
     await Prefs.getPrefs().then((prefs) {
       name = prefs.getString(PrefKey.name);
-
+      id = prefs.getString(PrefKey.id);
       token = prefs.getString(PrefKey.authorization) ?? "";
       phone = prefs.getString(PrefKey.phone) ?? "";
 
@@ -155,6 +156,7 @@ class _SplashScreenState extends State<SplashScreen> {
       replace(HomeNavScreen(
         type: type,
         name: name,
+        id: id,
       ));
     } else if (token.isNotEmpty && verified == 0 && phone != null) {
       replace(OtpScreen(phoneNumber: "${phone}"));

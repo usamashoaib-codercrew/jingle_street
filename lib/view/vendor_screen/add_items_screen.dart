@@ -109,7 +109,9 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
                     itemBuilder: (context, index) {
                       mediaListCount =_mediaList.where((item) => item is String).length;
                       mediaListCountVideo = _mediaList.where((item) => item is Map<String,String>).length;
+                      print("videocountwhiletakingimage${mediaListCountVideo}");
                       remainingSelectedImages = mediaListCount;
+                      // print("111111 ${_mediaList[index].endsWith("png")}");
 
                       return _buildMediaPreview(_mediaList[index]);
                     },
@@ -160,6 +162,7 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
                                 if (mediaListCount > 0) {
                                   mediaListCount--;
                                   remainingSelectedImages--;
+                                  print("mediaListCountdidsubtract${mediaListCount}");
                                 };
                               });
                             }
@@ -181,6 +184,7 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
                                   if (mediaListCount > 0) {
                                     mediaListCount--;
                                     remainingSelectedImages--;
+                                    print("mediaListCountdidsubtract${mediaListCount}");
                                   };
                                 });
 
@@ -208,6 +212,7 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
                                   if (mediaListCount > 0) {
                                     mediaListCount--;
                                     remainingSelectedImages--;
+                                    print("mediaListCountdidsubtract${mediaListCount}");
                                   };
                                 });
 
@@ -258,9 +263,11 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
                                       TextButton(
                                         onPressed: () {
                                           if (mediaListCount < 5) {
+                                            print("asjdklajsdklje${mediaListCount}");
                                             pickImages(); // push(GalleryScreen());
                                             pop();
                                           } else {
+                                            print("asjdklajsdklje${mediaListCount}");
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(const SnackBar(
                                               content: Text(
@@ -441,6 +448,37 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
     );
   }
 
+  // Future<void> _pickMedia() async {
+  //   final ImagePicker _picker = ImagePicker();
+  //   final media = await _picker.pickMultiImage();
+
+  //   if (media != null) {
+  //     setState(() {
+  //       _mediaList.addAll(media);
+  //     });
+  //   }
+  // }
+
+  // Future<void> _pickMedia() async {
+  //   final ImagePicker _picker = ImagePicker();
+  //   final List<XFile>? media = await _picker.pickMultiImage(
+  //     // maxImages: 5 - _mediaList.length,
+  //   );
+  //
+  //   if (media != null && media.isNotEmpty) {
+  //     setState(() {
+  //       _mediaList.addAll(media);
+  //     });
+  //   }
+  // }
+
+  //  if (_mediaList.length == 1) {
+
+  //                             _mediaList.removeAt(_pageIndexNotifier.value);
+  //                             // print("getttinnnng${_pageIndexNotifier.value}");
+  //                             setState(() {});
+  //                           }
+
   Future<void> _pickVideo() async {
     final ImagePicker _picker = ImagePicker();
     final video = await _picker.pickVideo(source: ImageSource.gallery);
@@ -512,6 +550,7 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
             int fileSize = await file.length();
             totalImageSize += fileSize; // Add to the total image size
 
+            print("Total selected images size ${totalImageSize}");
 
             if (totalImageSize > 10 * 1024 * 1024) {
               progressDialog.dismiss();
@@ -542,6 +581,7 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
         return; // Exit the function early if no images are selected
       }
 
+      print("Total videos selected ${videoFiles.length}");
 
       if (videoFiles.length > 1) {
         progressDialog.dismiss();
@@ -560,10 +600,12 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
         'name': itemNameController.getText(),
         'description': ingredientsController.getText(),
         'price': priceController.getText(),
-  
+        // 'images': imageFiles,
+        // 'videos': videoFiles,
         'files': filesNew,
       });
 
+      print("files nes ${filesNew}");
 
       final response = await dio.post(
         path: AppUrls.addProductImages,
@@ -571,10 +613,11 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
       );
 
       if (response.statusCode != StatusCode.OK) {
-        success = false; 
+        success = false; // Mark the success as false if the API call fails
       }
     } catch (e, stackTrace) {
-      success = false; //
+      print('addItemImage API exception: $e\nStack trace: $stackTrace');
+      success = false; // Mark the success as false if an exception occurs
     } finally {
       progressDialog.dismiss();
 
@@ -649,6 +692,62 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
       return Text('Invalid media type');
     }
   }
+
+//   Widget _buildMediaPreview(dynamic media) {
+
+//     if (media != XFile) {
+//       // Display the image
+//       return Image.file(
+//         File(media),
+//         fit: BoxFit.cover,
+//       );
+//     }
+//      else {
+// print("asdasd${media}");
+//       final String thumbnailPath = media['thumbnail'];
+//       final String videoPath = media['videoPath'];
+//       print("asdasdasdasd${thumbnailPath}");
+//       if (thumbnailPath.isNotEmpty) {
+//         // Display the video thumbnail with a play button
+//         return Stack(
+//           fit: StackFit.expand,
+//           children: [
+//             Image.file(
+//               File(thumbnailPath),
+//               fit: BoxFit.cover,
+//             ),
+//             Positioned.fill(
+//               child: Center(
+//                 child: Container(
+//                   width: 80,
+//                   height: 80,
+//                   child: IconButton(
+//                     onPressed: () {
+//                       push(VideoPlayScreen(videoUrl: videoPath));
+//                     },
+//                     icon: Icon(
+//                       Icons.play_circle_outline_outlined,
+//                       size: 40,
+//                       color: AppTheme.appColor,
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         );
+//       } else {
+//         // Display a placeholder for the video
+//         return Container(
+//           width: 128,
+//           height: 128,
+//           color: Colors
+//               .grey, // Replace with your desired placeholder color or widget
+//         );
+//       }
+//     }
+//   }
+
   bool isImageFile(File file) {
     List<String> imageExtensions = ['.jpg', '.jpeg', '.png', '.heic', '.heif'];
     return imageExtensions
@@ -673,14 +772,16 @@ class _AddItemsScreenState extends State<AddItemsScreen> {
         ),
       );
 
+      print("asdasdasd${resultList}");
       for (var result in resultList!) {
-       
+        print("result: $result");
         File? asset = await result.file;
         if (asset != null) {
           final filePath = asset.path;
 
           _mediaList.add((filePath));
-          
+          // selectedImagesss.add(filePath);
+          // print("asdasddddddd${selectedImagesss.length}");
         }
       }
       setState(() {});

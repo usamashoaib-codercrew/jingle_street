@@ -318,9 +318,9 @@ class _LoginScreenState extends State<LoginScreen> {
   _continue(context) {
     if (formKey.currentState!.validate()) {
       connectivity(context);
-    
+      print("...............ok");
     } else {
-
+      print(".......... not Ok");
     }
   }
 
@@ -381,9 +381,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 replace(HomeNavScreen(
                   type: data['type'],
                   token: token,
+                  id: data['id'],
                 ));
               } else if (data['type'] == 0 && _isCustomer == true) {
-                replace(HomeNavScreen(type: data['type']));
+                replace(HomeNavScreen(type: data['type'],id: data['id'],));
               } else {
                 MessageDialog(
                         title: "Select",
@@ -461,7 +462,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> getAuthToken(String tokenIs) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final fcm_tokenGEt = prefs.getString('fcm_token');
-   
+    print("klfkslkdj$fcm_tokenGEt");
     final Map<String, dynamic> headers = {
       'Authorization':
           'Bearer $tokenIs', // Replace with your actual authorization token
@@ -474,7 +475,7 @@ class _LoginScreenState extends State<LoginScreen> {
           data: {
             'fcm': fcm_tokenGEt,
           });
-   
+      print("fksjlfks${response.data}");
       if (response.statusCode == StatusCode.OK) {
         print("FCM TOKEN HAS BEEN ADDED SUCCESSFULLY $fcm_tokenGEt");
       }
