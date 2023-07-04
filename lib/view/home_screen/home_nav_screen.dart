@@ -209,7 +209,7 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
                       profileImage: desiredVendor!["profilepic"],
                       address: desiredVendor!["address"],
                       vType: desiredVendor!["type"],
-                      uType: widget.type == 1 ? 1 : 0,
+                      uType: widget.type == 1 ? widget.id== desiredVendor!["user_id"]?1:0: 0,
                       lat: desiredVendor!["latitude"],
                       lon: desiredVendor!["longitude"],
                       vId: desiredVendor!["id"],

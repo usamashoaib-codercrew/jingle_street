@@ -137,7 +137,7 @@ class _VendorReviewScreenState extends State<VendorReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-
+    print("145${widget.vId}");
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppTheme.appColor,

@@ -134,7 +134,7 @@ class _VandorScreenState extends State<VandorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("vtype..${widget.vType}");
+    print("vtype${widget.id}");
     bool myBoolean = Provider.of<BoolProvider>(context).myBoolean;
     var size = MediaQuery.of(context).size;
 
@@ -286,6 +286,8 @@ class _VandorScreenState extends State<VandorScreen> {
                             lon: widget.long,
                             businessName: widget.businessName,
                             location: widget.location,
+                            vId: widget.id,
+
                           ));
                         },
                         child: AppText(
