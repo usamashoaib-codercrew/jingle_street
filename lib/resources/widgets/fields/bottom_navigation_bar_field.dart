@@ -38,44 +38,44 @@ class _BottomNavigationBarFieldState extends State<BottomNavigationBarField> {
     return Scaffold(
       extendBody: true,
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
-        height: 8.1.h,
+          height: 8.1.h,
           itemCount: 3,
           tabBuilder: (index, isActive) {
             return index == 0
                 ? Icon(Icons.home,color: isActive? AppTheme.appColor:Colors.red.shade200,)
                 : (index == 1
-                    ? Padding(
-                      padding: EdgeInsets.only(left: 13.2.w,top: 2.2.h),
-                      child: Stack(
-                          children: [
-                             Icon(Icons.notifications,color: isActive? AppTheme.appColor:Colors.red.shade200,),
-                             Positioned(
-                              left: 5.w,
-                              bottom: 4.1.h,
-                              child:  Container(
-                                padding: EdgeInsets.all(1),
-                                decoration:  BoxDecoration(
-                                  color: isActive? AppTheme.appColor:Colors.red.shade200,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                constraints: BoxConstraints(
-                                  minWidth: 12,
-                                  minHeight: 12,
-                                ),
-                                child:  Text(
-                                  '${widget.notifyCount}',
-                                  style:  TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 8,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )
-                          ],
+                ? Padding(
+              padding: EdgeInsets.only(left: 13.2.w,top: 2.2.h),
+              child: Stack(
+                children: [
+                  Icon(Icons.notifications,color: isActive? AppTheme.appColor:Colors.red.shade200,),
+                  Positioned(
+                    left: 5.w,
+                    bottom: 4.1.h,
+                    child:  Container(
+                      padding: EdgeInsets.all(1),
+                      decoration:  BoxDecoration(
+                        color: isActive? AppTheme.appColor:Colors.red.shade200,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 12,
+                        minHeight: 12,
+                      ),
+                      child:  Text(
+                        '${widget.notifyCount}',
+                        style:  TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
                         ),
-                    )
-                    : Icon(Icons.settings,color: isActive? AppTheme.appColor:Colors.red.shade200,));
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            )
+                : Icon(Icons.settings,color: isActive? AppTheme.appColor:Colors.red.shade200,));
             // Icon(
             //     index == 0 ? Icons.home : (index == 1 ? Icons.search : Icons.person),
             //     color: Colors.blue,

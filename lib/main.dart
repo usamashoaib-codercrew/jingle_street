@@ -21,6 +21,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'view/startup_screen/splash_screen.dart';
 
+
 void main() async {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: AppTheme.appColor,
@@ -64,6 +65,24 @@ void main() async {
   );
 }
 
+
+// FirebaseMessaging messagingMain = FirebaseMessaging.instance;
+// final fcmToken = await messagingMain.getToken();
+// print("FCM token is ${fcmToken}");
+// SharedPreferences _prefs = await SharedPreferences.getInstance();
+// FirebaseMessaging.instance.getToken().then((token) {
+// print('This is Token: ' '${token}');
+// _prefs.setString("fcm_token", token!);
+// });
+// messagingMain.onTokenRefresh.listen((event) {
+// print("klsdlkfjl$event");
+// event.toString();
+// if (kDebugMode) {
+// print('refresh');
+// }
+// _prefs.setString("fcm_token", event);
+// });
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -83,8 +102,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   void isTokenRefresh() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
     messaging.onTokenRefresh.listen((event) {
       event.toString();
+      _prefs.setString("fcm_token", event);
       if (kDebugMode) {
         print('refresh');
       }

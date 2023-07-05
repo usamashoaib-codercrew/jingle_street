@@ -2,6 +2,7 @@ import 'package:dialogs/dialogs/message_dialog.dart';
 import 'package:dialogs/dialogs/progress_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/connectivity/connectivity.dart';
@@ -45,11 +46,34 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _passwordController = TextEditingController();
   String userEmail = '';
 
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  Future<String> getDeviceToken() async {
+    String? token = await messaging.getToken();
+    print("ajksdlajs${token}");
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    _prefs.setString("fcm_token", token!);
+    return token;
+  }
+
+  void isTokenRefresh() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    messaging.onTokenRefresh.listen((event) {
+      event.toString();
+      _prefs.setString("fcm_token", event);
+      if (kDebugMode) {
+        print('refresh');
+      }
+    });
+  }
+
   @override
   void initState() {
     _loadUserEmailPassword();
     dio = AppDio(context);
     Logger.init();
+    getDeviceToken();
+    isTokenRefresh();
     super.initState();
   }
 

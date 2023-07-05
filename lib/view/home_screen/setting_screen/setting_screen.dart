@@ -1,5 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:jingle_street/config/app_urls.dart';
+import 'package:jingle_street/config/dio/app_dio.dart';
 import 'package:jingle_street/config/keys/pref_keys.dart';
+import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
@@ -10,6 +14,7 @@ import 'package:jingle_street/view/home_screen/setting_screen/contact_screen.dar
 import 'package:jingle_street/view/home_screen/setting_screen/help_screen.dart';
 import 'package:jingle_street/view/vendor_screen/vendor_profile_screen.dart';
 import 'package:req_fun/req_fun.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
   final int? type;
@@ -21,6 +26,12 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+  late AppDio dio;
+  @override
+  void initState() {
+    dio = AppDio(context);
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -166,7 +177,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                               children: [
                                                 InkWell(
                                                   onTap: () async {
-                                                    await logoutUser();
+                                                    // await logoutUser();
+                                                    await removeAuthToken();
                                                     Navigator.of(context).popUntil((route) => route.isFirst);
                                                     replace(LoginScreen());
                                                   },
@@ -242,6 +254,25 @@ class _SettingScreenState extends State<SettingScreen> {
                       ]),
                 ))));
   }
+  removeAuthToken() async {
+    try {
+      final response = await dio.post(
+          path: AppUrls.updatefcmToken,
+          data: {
+            'fcm': "",
+          });
+      print("fksjlfks${response.data}");
+      if (response.statusCode == StatusCode.OK) {
+        print("FCM TOKEN HAS BEEN REMOVED SUCCESSFULLY");
+        logoutUser();
+      }
+    } catch (e, stackTrace) {
+      print('Update FCM token exception: $e\nStack trace: $stackTrace');
+      // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      //   content: Text('FCM Token not updated.'),
+      // ));
+    }
+  }
 
   logoutUser() async {
     print(PrefKey.authorization);
@@ -249,5 +280,6 @@ class _SettingScreenState extends State<SettingScreen> {
     await Prefs.remove(PrefKey.id);
     await Prefs.remove(PrefKey.verified);
     await Prefs.remove(PrefKey.profile);
+    // await Prefs.remove('fcm_token');
   }
 }

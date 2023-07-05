@@ -44,23 +44,27 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
   //initialising firebase message plugin
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
 
   //function to initialise flutter local notification plugin to show notifications for android when app is active
   void initLocalNotifications(
       BuildContext context, RemoteMessage message) async {
     var androidInitializationSettings =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
-    var iosInitializationSettings = const DarwinInitializationSettings();
+    const AndroidInitializationSettings('@mipmap/ic_launcher');
+    var iosInitializationSettings = const DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
 
     var initializationSetting = InitializationSettings(
         android: androidInitializationSettings, iOS: iosInitializationSettings);
 
     await _flutterLocalNotificationsPlugin.initialize(initializationSetting,
         onDidReceiveNotificationResponse: (payload) {
-      // handle interaction when app is active for android
-      handleMessage(context, message);
-    });
+          // handle interaction when app is active for android
+          handleMessage(context, message);
+        });
   }
 
   void firebaseInit(BuildContext context) {
@@ -126,21 +130,21 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     );
 
     AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(
-            channel.id.toString(), channel.name.toString(),
-            channelDescription: 'your channel description',
-            importance: Importance.high,
-            priority: Priority.high,
-            playSound: true,
-            ticker: 'ticker',
-            sound: channel.sound
-            //     sound: RawResourceAndroidNotificationSound('jetsons_doorbell')
-            //  icon: largeIconPath
-            );
+    AndroidNotificationDetails(
+        channel.id.toString(), channel.name.toString(),
+        channelDescription: 'your channel description',
+        importance: Importance.high,
+        priority: Priority.high,
+        playSound: true,
+        ticker: 'ticker',
+        sound: channel.sound
+      //     sound: RawResourceAndroidNotificationSound('jetsons_doorbell')
+      //  icon: largeIconPath
+    );
 
     const DarwinNotificationDetails darwinNotificationDetails =
-        DarwinNotificationDetails(
-            presentAlert: true, presentBadge: true, presentSound: true);
+    DarwinNotificationDetails(
+        presentAlert: true, presentBadge: true, presentSound: true);
 
     NotificationDetails notificationDetails = NotificationDetails(
         android: androidNotificationDetails, iOS: darwinNotificationDetails);
@@ -155,29 +159,11 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     });
   }
 
-  //function to get device token on which we will send the notifications
-  Future<String> getDeviceToken() async {
-    String? token = await messaging.getToken();
-    print("ajksdlajs${token}");
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.setString("fcm_token", token!);
-    return token;
-  }
-
-  void isTokenRefresh() async {
-    messaging.onTokenRefresh.listen((event) {
-      event.toString();
-      if (kDebugMode) {
-        print('refresh');
-      }
-    });
-  }
-
   //handle tap on notification when app is in background or terminated
   Future<void> setupInteractMessage(BuildContext context) async {
     // when app is terminated
     RemoteMessage? initialMessage =
-        await FirebaseMessaging.instance.getInitialMessage();
+    await FirebaseMessaging.instance.getInitialMessage();
 
     if (initialMessage != null) {
       handleMessage(context, initialMessage);
@@ -191,22 +177,22 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
   }
 
   void handleMessage(BuildContext context, RemoteMessage message) {
-    Map<String, dynamic> data = json.decode(message.data['Review']);
-    for (var vendor in vendorData) {
-      if (vendor["id"] == data["vendor_id"]) {
-        desiredVendor = vendor;
+    print("object134|${message.data}");
+
+    if (message.data['actions'] == 'Home') {
+      print("1567");
+      handleAction2(message.data['noti_id']);
+    } else if (message.data['actions'] == 'Review') {
+      Map<String, dynamic> data = json.decode(message.data['Review']);
+      print("100$data");
+      for (var vendor in vendorData) {
+        if (vendor["id"] == data["vendor_id"]) {
+          desiredVendor = vendor;
+          print("desired$desiredVendor");
+          handleAction(message);
+        }
       }
-      if (message.data['actions'] == 'Home') {
-        
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<void>(
-              builder: (_) =>
-                  HomeNavScreen(type: widget.type, token: widget.token)),
-        );
-      } else if (message.data['actions'] == 'Review') {
-        handleAction(message);
-      }
+      print("1987${message.data['actions']}");
     }
   }
 
@@ -314,54 +300,38 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
   }
 
   Future<void> handleAction(message) async {
-    if (message.data['actions'] == 'Review') {
-      print("1272${message.data["noti_id"]}");
-      await seenNotifications(message.data[
-          "noti_id"]); // Assuming seenNotifications is an asynchronous API call
+    print("1272${message.data["noti_id"]}");
+    await seenNotifications(message.data["noti_id"]);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          builder: (_) => VendorReviewScreen(
-            businessName: desiredVendor!["businessname"],
-            profileImage: desiredVendor!["profilepic"],
-            address: desiredVendor!["address"],
-            vType: desiredVendor!["type"],
-            uType: widget.type == 1
-                ? (widget.id == desiredVendor!["user_id"] ? 1 : 0)
-                : 0,
-            lat: desiredVendor!["latitude"],
-            lon: desiredVendor!["longitude"],
-            vId: desiredVendor!["id"],
-            location: desiredVendor!["location"],
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => VendorReviewScreen(
+          businessName: desiredVendor!["businessname"],
+          profileImage: desiredVendor!["profilepic"],
+          address: desiredVendor!["address"],
+          vType: desiredVendor!["type"],
+          uType: widget.type == 1
+              ? (widget.id == desiredVendor!["user_id"] ? 1 : 0)
+              : 0,
+          lat: desiredVendor!["latitude"],
+          lon: desiredVendor!["longitude"],
+          vId: desiredVendor!["id"],
+          location: desiredVendor!["location"],
         ),
-      );
-    } else {
-      print("not navigated");
-    }
+      ),
+    );
+  }
+
+  Future<void> handleAction2(id) async {
+    print("1273${id}");
+    await seenNotifications(id);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute<void>(
+          builder: (_) =>
+              HomeNavScreen(type: widget.type, token: widget.token)),
+    );
   }
 }
-
-// var _androidAppRetain = MethodChannel("android_app_retain");
-
-// @override
-// Widget build(BuildContext context) {
-//   return WillPopScope(
-//     onWillPop: () {
-//       if (Platform.isAndroid) {
-//         if (Navigator.of(context).canPop()) {
-//           return Future.value(true);
-//         } else {
-//           _androidAppRetain.invokeMethod("sendToBackground");
-//           return Future.value(false);
-//         }
-//       } else {
-//         return Future.value(true);
-//       }
-//     },
-//     child: Scaffold(
-//     ...
-//     ),
-//   );
-// }

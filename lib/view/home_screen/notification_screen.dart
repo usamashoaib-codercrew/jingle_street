@@ -66,11 +66,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   onTap: () {
                     seenNotifications(resData[index]["id"]);
                     Prefs.getPrefs().then((value) {
-                    int value1 =  value.getInt(PrefKey.notifyCount)!;
-                    if(value1<0){
-                      value1--;
-                    }
-                    Prefs.setInt(PrefKey.notifyCount, value1);
+                      int value1 =  value.getInt(PrefKey.notifyCount)!;
+                      if(value1<0){
+                        value1--;
+                      }
+                      Prefs.setInt(PrefKey.notifyCount, value1);
                     });
                     print("object:11");
                     String id = resData[index]["vendor_id"];
@@ -81,7 +81,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         print("55${desiredVendor}");
                       }
                     }
-            
+
                     if (resData[index]["action"] == "Review") {
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
@@ -128,11 +128,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
-                     
+
                       // color: resData[index]["seen"] == 1
                       //     ? AppTheme.appColor
                       //     : const Color.fromARGB(255, 229, 100, 91),
-                      
+
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -161,7 +161,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                       ["updatedAt"]),
                                 ],
                               ),
-                              
+
                             ],
                           ),
                           resData[index]["seen"] != 1?     CircleAvatar(
