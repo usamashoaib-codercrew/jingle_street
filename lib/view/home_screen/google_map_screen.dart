@@ -1190,6 +1190,11 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
       } else if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
         if (resData['status'] == true) {
+   
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt("getValueofNotify", resData["data"]["noti"]);
+
+  
           var data = responseData['data']['vendorprofile'];
           _profile.add(data);
         }

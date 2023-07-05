@@ -250,7 +250,12 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     return BottomNavigationBarField(
       bodyList: [
         GoogleMapScreen(type: widget.type,token: widget.token),
-        NotificationScreen(type: widget.type, token: widget.token, vId: widget.id,),
+
+        Stack(
+          children: [
+            NotificationScreen(type: widget.type, token: widget.token, vId: widget.id,),
+          ],
+        ),
         SettingScreen(type: widget.type,name: widget.name, ),
       ],
       iconData: [
