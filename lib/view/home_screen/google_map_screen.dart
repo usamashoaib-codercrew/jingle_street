@@ -62,7 +62,7 @@ class Vendor {
       required this.hashtags,
       required this.latitude,
       required this.longitude,
-      required this.user_id, 
+      required this.user_id,
       this.following});
 }
 
@@ -140,6 +140,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   //initilizing marker data, hashtag data and ProfilepicData
   late Stream<List<dynamic>> _futureGetpicture;
   late Future<List<dynamic>> _futureSortedNearestVendors;
+
   // late Stream<Set<Marker>> _futureGetVendor;
   Stream<List<dynamic>>? _searchHashTagFinalResult;
   Marker markers = Marker(markerId: MarkerId("1"), visible: false);
@@ -277,7 +278,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                                     : 0,
                                                 bio: vendor.bio,
                                                 follow: vendor.following,
-                                            
                                               ),
                                             )),
                                             child: Padding(
@@ -642,7 +642,12 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                       );
                                     },
                                   )
-                                : SizedBox(),
+                                : StreamBuilder(
+                                    stream: _futureGetpicture,
+                                    builder: (context, snapshot) {
+                                      return SizedBox();
+                                    },
+                                  ),
                           ],
                         ),
                         Stack(
@@ -774,15 +779,11 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
-        print("........${resData['status']}");
-
         if (resData['status'] == true) {
           var data = responseData['data']['vendorprofile'] ?? [];
-
           setState(() {
             _vendorType = data["type"];
           });
-          print("asdasd${_vendorType}");
         }
       }
     } catch (e, s) {
@@ -942,22 +943,21 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
         for (var vendorData in data) {
           sortedVendors.addAll([
             Vendor(
-              id: vendorData["id"] ?? "",
-              location: vendorData["location"] ?? "",
-              type: vendorData["type"],
-              bio: vendorData["bio"] ?? "Bio Missing",
-              businessName: vendorData["businessname"],
-              address: vendorData["address"],
-              profilepic: vendorData["profilepic"],
-              businesshours: vendorData["businesshours"] ??
-                  "Vendor Did Not Mentioned Business Hours",
-              hashtags: vendorData["hashtags"],
-              user_id: vendorData["user_id"],
-              latitude: vendorData["latitude"] + 0.0,
-              longitude: vendorData["longitude"] + 0.0,
-              statusCode: vendorData["status"],
-              following: vendorData["is_following"]
-            )
+                id: vendorData["id"] ?? "",
+                location: vendorData["location"] ?? "",
+                type: vendorData["type"],
+                bio: vendorData["bio"] ?? "Bio Missing",
+                businessName: vendorData["businessname"],
+                address: vendorData["address"],
+                profilepic: vendorData["profilepic"],
+                businesshours: vendorData["businesshours"] ??
+                    "Vendor Did Not Mentioned Business Hours",
+                hashtags: vendorData["hashtags"],
+                user_id: vendorData["user_id"],
+                latitude: vendorData["latitude"] + 0.0,
+                longitude: vendorData["longitude"] + 0.0,
+                statusCode: vendorData["status"],
+                following: vendorData["is_following"])
           ]);
 
           sortedVendors.sort((a, b) {
@@ -1107,7 +1107,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                             businessName: marker["businessname"],
                             businessHours: marker["businesshours"] ??
                                 "Business Hours Not mentioned",
-                                
                             address: marker["address"],
                             hashTags: marker["hashtags"],
                             imageUrl: imageData),
@@ -1190,13 +1189,13 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
       } else if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
         if (resData['status'] == true) {
-   
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt("getValueofNotify", resData["data"]["noti"]);
-
-  
           var data = responseData['data']['vendorprofile'];
+          int notifyCount = resData["data"]["noti"];
           _profile.add(data);
+
+          Prefs.getPrefs().then((value) {
+            value.setInt(PrefKey.notifyCount, notifyCount);
+          });
         }
       }
     } catch (e, s) {

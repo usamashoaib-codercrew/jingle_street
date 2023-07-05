@@ -24,4 +24,6 @@ class AppUrls {
   static final String followVendor = "/api/bookmarkvendor";
   static final String getNotify = "/api/getnotifications";
   static final String is_following = "/api/is_following";
+  static final String seenNotification = "/api/seennotification";
+
 }

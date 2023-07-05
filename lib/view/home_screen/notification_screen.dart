@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
+import 'package:jingle_street/config/keys/pref_keys.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
@@ -54,124 +55,131 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: resData == null
           ? Center(
-              child: CircularProgressIndicator(color: AppTheme.whiteColor),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
-                  itemCount: resData.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        left: 8.0,
-                      ),
-                      child: Column(
+        child: CircularProgressIndicator(color: AppTheme.whiteColor),
+      )
+          : ListView.builder(
+          itemCount: resData.length,
+          itemBuilder: (context, index) {
+            return Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    seenNotifications(resData[index]["id"]);
+                    Prefs.getPrefs().then((value) {
+                    int value1 =  value.getInt(PrefKey.notifyCount)!;
+                    if(value1<0){
+                      value1--;
+                    }
+                    Prefs.setInt(PrefKey.notifyCount, value1);
+                    });
+                    print("object:11");
+                    String id = resData[index]["vendor_id"];
+                    print("19$id");
+                    for (var vendor in vendorData) {
+                      if (vendor["id"] == id) {
+                        desiredVendor = vendor;
+                        print("55${desiredVendor}");
+                      }
+                    }
+            
+                    if (resData[index]["action"] == "Review") {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return VendorReviewScreen(
+                              profileImage: desiredVendor!["profilepic"] ??
+                                  "http://3.13.220.3/default.png",
+                              location: desiredVendor!["location"],
+                              address: desiredVendor!["address"] ?? "",
+                              vType: desiredVendor!["type"] ?? "",
+                              uType: widget.type == 1
+                                  ? widget.vId == desiredVendor!["user_id"]
+                                  ? 1
+                                  : 0
+                                  : 0,
+                              vId: desiredVendor!["id"],
+                              lat: desiredVendor!["latitude"] ?? "",
+                              lon: desiredVendor!["longitude"] ?? "",
+                              businessName:
+                              desiredVendor!["businessname"] ?? "");
+                        },
+                      ));
+                    } else if (resData[index]["action"] == "Home") {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VandorScreen(
+                              businessName: desiredVendor!["businessname"],
+                              bio: desiredVendor!["bio"],
+                              businessHours:
+                              desiredVendor!["businesshours"],
+                              photo: desiredVendor!["profilepic"],
+                              address: desiredVendor!["address"],
+                              lat: desiredVendor!["latitude"],
+                              long: desiredVendor!["longitude"],
+                              vType: desiredVendor!["type"],
+                              id: desiredVendor!["id"],
+                              uType: widget.type,
+                              location: desiredVendor!["location"],
+                              follow: desiredVendor!["is_following"],
+                            ),
+                          ));
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                     
+                      // color: resData[index]["seen"] == 1
+                      //     ? AppTheme.appColor
+                      //     : const Color.fromARGB(255, 229, 100, 91),
+                      
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          InkWell(
-                            onTap: () {
-                              print("object:11");
-                              String id = resData[index]["vendor_id"];
-                              print("19$id");
-                              for (var vendor in vendorData) {
-                                if (vendor["id"] == id) {
-                                  desiredVendor = vendor;
-                                  print("55${desiredVendor}");
-                                }
-                              }
-
-                              if (resData[index]["action"] == "Review") {
-                                Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) {
-                                    return VendorReviewScreen(
-                                        profileImage:
-                                            desiredVendor!["profilepic"] ??
-                                                "http://3.13.220.3/default.png",
-                                        location: desiredVendor!["location"],
-                                        address:
-                                            desiredVendor!["address"] ?? "",
-                                        vType: desiredVendor!["type"] ?? "",
-                                        uType: widget.type == 1
-                                            ? widget.vId ==
-                                                    desiredVendor!["user_id"]
-                                                ? 1
-                                                : 0
-                                            : 0,
-                                        vId: desiredVendor!["id"],
-                                        lat: desiredVendor!["latitude"] ?? "",
-                                        lon: desiredVendor!["longitude"] ?? "",
-                                        businessName:
-                                            desiredVendor!["businessname"] ??
-                                                "");
-                                  },
-                                ));
-                              } else if (resData[index]["action"] == "Home") {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => VandorScreen(
-                                        businessName:
-                                            desiredVendor!["businessname"],
-                                        bio: desiredVendor!["bio"],
-                                        businessHours:
-                                            desiredVendor!["businesshours"],
-                                        photo: desiredVendor!["profilepic"],
-                                        address: desiredVendor!["address"],
-                                        lat: desiredVendor!["latitude"],
-                                        long: desiredVendor!["longitude"],
-                                        vType: desiredVendor!["type"],
-                                        id: desiredVendor!["id"],
-                                        uType: widget.type,
-                                        location: desiredVendor!["location"],
-                                        follow: desiredVendor!["is_following"],
-                                      ),
-                                    ));
-                              }
-                            },
-                            child: Container(
-                              // color: ,
-                              height: 70,
-                              child: Row(
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                    "${resData[index]["image"]}"),
+                                radius: 25,
+                              ),
+                              SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                        "${resData[index]["image"]}"),
-                                    radius: 25,
+                                  AppText(
+                                    "${resData[index]["message"]}",
+                                    ellipsis: true,
+                                    size: 20,
+                                    bold: FontWeight.w400,
                                   ),
-                                  SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      AppText(
-                                        "${resData[index]["message"]}",
-                                        ellipsis: true,
-                                        color: resData[index]["seen"] == 1
-                                            ? AppTheme.whiteColor
-                                            : Colors.yellow,
-                                        size: 20,
-                                        bold: FontWeight.w400,
-                                      ),
-                                      SizeBoxHeight10(),
-                                      formatTimestampWidget(
-                                          timestamp: resData[index]
-                                              ["updatedAt"]),
-                                    ],
-                                  ),
+                                  SizeBoxHeight10(),
+                                  formatTimestampWidget(
+                                      timestamp: resData[index]
+                                      ["updatedAt"]),
                                 ],
                               ),
-                            ),
+                              
+                            ],
                           ),
-                          Divider(
-                              thickness: 1,
-                              color: AppTheme.whiteColor,
-                              indent: 10,
-                              endIndent: 10),
+                          resData[index]["seen"] != 1?     CircleAvatar(
+                            backgroundColor: Colors.yellow,
+                            radius: 5,
+                          ): SizedBox()
                         ],
                       ),
-                    );
-                  }),
-            ),
+                    ),
+                  ),
+                ),
+                Divider(
+                  thickness: 0.6,
+                  color: Colors.white,
+                ),
+              ],
+            );
+          }),
     );
   }
 
@@ -249,7 +257,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
   ///////////////////////////////////////////////////////////
 
-   
-  
+  seenNotifications(id) async {
+    print("090$id");
+    var response;
+    try {
+      response = await dio.post(path: AppUrls.seenNotification, data: {
+        'noti_id': id,
+      });
+      var responseData = response.data;
 
+      if (response.statusCode == StatusCode.BAD_REQUEST) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Server Down')));
+      } else if (response.statusCode == StatusCode.OK) {
+        var resData = responseData;
+        if (resData['status'] == true) {
+          getNOtifications();
+        }
+      }
+    } catch (e, s) {
+      print("_____$e");
+      print("_____$s");
+    }
+  }
 }

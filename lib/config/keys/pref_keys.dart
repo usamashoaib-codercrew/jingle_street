@@ -8,6 +8,7 @@ class PrefKey {
   static const String notification = "notification";
   static const String id = "id";
   static const String type = "type";
+  static const String notifyCount = "notifyCount";
   static const String verified = "verified";
   static const String name = "name";
   static const String rememberMe = "remember_me";
