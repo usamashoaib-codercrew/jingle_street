@@ -65,24 +65,6 @@ void main() async {
   );
 }
 
-
-// FirebaseMessaging messagingMain = FirebaseMessaging.instance;
-// final fcmToken = await messagingMain.getToken();
-// print("FCM token is ${fcmToken}");
-// SharedPreferences _prefs = await SharedPreferences.getInstance();
-// FirebaseMessaging.instance.getToken().then((token) {
-// print('This is Token: ' '${token}');
-// _prefs.setString("fcm_token", token!);
-// });
-// messagingMain.onTokenRefresh.listen((event) {
-// print("klsdlkfjl$event");
-// event.toString();
-// if (kDebugMode) {
-// print('refresh');
-// }
-// _prefs.setString("fcm_token", event);
-// });
-
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 

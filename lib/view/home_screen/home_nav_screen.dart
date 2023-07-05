@@ -15,6 +15,7 @@ import 'package:jingle_street/view/buy_screen/cart_confirm_order_screen.dart';
 import 'package:jingle_street/view/home_screen/google_map_screen.dart';
 import 'package:jingle_street/view/home_screen/notification_screen.dart';
 import 'package:jingle_street/view/home_screen/setting_screen/setting_screen.dart';
+import 'package:jingle_street/view/menu_screen/menu_screen.dart';
 import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,13 +45,13 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
   //initialising firebase message plugin
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   //function to initialise flutter local notification plugin to show notifications for android when app is active
   void initLocalNotifications(
       BuildContext context, RemoteMessage message) async {
     var androidInitializationSettings =
-    const AndroidInitializationSettings('@mipmap/ic_launcher');
+        const AndroidInitializationSettings('@mipmap/ic_launcher');
     var iosInitializationSettings = const DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -62,9 +63,9 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
     await _flutterLocalNotificationsPlugin.initialize(initializationSetting,
         onDidReceiveNotificationResponse: (payload) {
-          // handle interaction when app is active for android
-          handleMessage(context, message);
-        });
+      // handle interaction when app is active for android
+      handleMessage(context, message);
+    });
   }
 
   void firebaseInit(BuildContext context) {
@@ -130,21 +131,21 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     );
 
     AndroidNotificationDetails androidNotificationDetails =
-    AndroidNotificationDetails(
-        channel.id.toString(), channel.name.toString(),
-        channelDescription: 'your channel description',
-        importance: Importance.high,
-        priority: Priority.high,
-        playSound: true,
-        ticker: 'ticker',
-        sound: channel.sound
-      //     sound: RawResourceAndroidNotificationSound('jetsons_doorbell')
-      //  icon: largeIconPath
-    );
+        AndroidNotificationDetails(
+            channel.id.toString(), channel.name.toString(),
+            channelDescription: 'your channel description',
+            importance: Importance.high,
+            priority: Priority.high,
+            playSound: true,
+            ticker: 'ticker',
+            sound: channel.sound
+            //     sound: RawResourceAndroidNotificationSound('jetsons_doorbell')
+            //  icon: largeIconPath
+            );
 
     const DarwinNotificationDetails darwinNotificationDetails =
-    DarwinNotificationDetails(
-        presentAlert: true, presentBadge: true, presentSound: true);
+        DarwinNotificationDetails(
+            presentAlert: true, presentBadge: true, presentSound: true);
 
     NotificationDetails notificationDetails = NotificationDetails(
         android: androidNotificationDetails, iOS: darwinNotificationDetails);
@@ -163,7 +164,7 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
   Future<void> setupInteractMessage(BuildContext context) async {
     // when app is terminated
     RemoteMessage? initialMessage =
-    await FirebaseMessaging.instance.getInitialMessage();
+        await FirebaseMessaging.instance.getInitialMessage();
 
     if (initialMessage != null) {
       handleMessage(context, initialMessage);
@@ -180,6 +181,13 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     print("object134|${message.data}");
 
     if (message.data['actions'] == 'Home') {
+      for (var vendor in vendorData) {
+        if (vendor["id"] == message.data["vendor_id"]) {
+          desiredVendor = vendor;
+          print("desired$desiredVendor");
+          handleAction(message);
+        }
+      }
       print("1567");
       handleAction2(message.data['noti_id']);
     } else if (message.data['actions'] == 'Review') {
@@ -330,8 +338,20 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute<void>(
-          builder: (_) =>
-              HomeNavScreen(type: widget.type, token: widget.token)),
+          builder: (_) => VandorScreen(
+                businessName: desiredVendor!["Slice Shop"],
+                bio: desiredVendor!["bio"],
+                businessHours: desiredVendor!["businesshours"],
+                photo: desiredVendor!["profilepic"],
+                address: desiredVendor!["address"],
+                lat: desiredVendor!["latitude"],
+                long: desiredVendor!["longitude"],
+                vType: desiredVendor!["type"],
+                id: desiredVendor!["id"],
+                uType: widget.type,
+                location: desiredVendor!["location"],
+                follow: desiredVendor!["is_following"],
+              )),
     );
   }
 }
