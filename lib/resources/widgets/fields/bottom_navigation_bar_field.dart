@@ -9,6 +9,8 @@ import 'package:sizer/sizer.dart';
 class BottomNavigationBarField extends StatefulWidget {
   final List<Widget> bodyList;
   final int notifyCount;
+  final int currentState;
+  final  Function(int)? onTap;
 
   // final List<BottomNavigationBarItem> items;
 
@@ -16,7 +18,7 @@ class BottomNavigationBarField extends StatefulWidget {
 
   const BottomNavigationBarField({
     Key? key,
-    required this.bodyList,  this.notifyCount =0,
+    required this.bodyList,  this.notifyCount =0,this. onTap,this.currentState=0
     //  required this.iconData
   }) : super(key: key);
 
@@ -26,8 +28,17 @@ class BottomNavigationBarField extends StatefulWidget {
 }
 
 class _BottomNavigationBarFieldState extends State<BottomNavigationBarField> {
-  int _currentState = 0;
 
+
+ // _BottomNavigationBarFieldState(this.notifyCount);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+
+  }
   // void _navOnTapped(int currentindex) {
   //   _currentState = currentindex;
   //   setState(() {});
@@ -52,25 +63,30 @@ class _BottomNavigationBarFieldState extends State<BottomNavigationBarField> {
                   Positioned(
                     left: 5.w,
                     bottom: 4.1.h,
-                    child:  Container(
-                      padding: EdgeInsets.all(1),
-                      decoration:  BoxDecoration(
-                        color: isActive? AppTheme.appColor:Colors.red.shade200,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      constraints: BoxConstraints(
-                        minWidth: 12,
-                        minHeight: 12,
-                      ),
-                      child:  Text(
-                        '${widget.notifyCount}',
-                        style:  TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
+                    child: Visibility(
+                      visible: widget.notifyCount==0? false:true,
+                      child: Container(
+                        padding: EdgeInsets.all(1),
+                        decoration:  BoxDecoration(
+                          color: isActive? AppTheme.appColor:Colors.red.shade200,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        textAlign: TextAlign.center,
+                        constraints: BoxConstraints(
+                          minWidth: 12,
+                          minHeight: 12,
+                        ),
+                        child:  Text(
+                          '${widget.notifyCount}',
+                          style:  TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
+                    )
+
+                    ,
                   )
                 ],
               ),
@@ -90,14 +106,9 @@ class _BottomNavigationBarFieldState extends State<BottomNavigationBarField> {
           rightCornerRadius: 32,
 
           // icons: widget.iconData,
-          activeIndex: _currentState,
-          onTap: (index) {
-            setState(() {
-              _currentState = index;
-            });
-            //  navigateToScreen(index);
-          }),
-      body: widget.bodyList.elementAt(_currentState),
+          activeIndex: widget.currentState,
+          onTap: widget.onTap!,),
+      body: widget.bodyList.elementAt(widget.currentState),
     );
     // return Scaffold(
     //     body: widget.bodyList.elementAt(_currentState),

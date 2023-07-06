@@ -55,131 +55,131 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: resData == null
           ? Center(
-        child: CircularProgressIndicator(color: AppTheme.whiteColor),
-      )
+              child: CircularProgressIndicator(color: AppTheme.whiteColor),
+            )
           : ListView.builder(
-          itemCount: resData.length,
-          itemBuilder: (context, index) {
-            return Column(
-              children: [
-                InkWell(
-                  onTap: () {
-                    seenNotifications(resData[index]["id"]);
-                    Prefs.getPrefs().then((value) {
-                      int value1 =  value.getInt(PrefKey.notifyCount)!;
-                      if(value1<0){
-                        value1--;
-                      }
-                      Prefs.setInt(PrefKey.notifyCount, value1);
-                    });
-                    print("object:11");
-                    String id = resData[index]["vendor_id"];
-                    print("19$id");
-                    for (var vendor in vendorData) {
-                      if (vendor["id"] == id) {
-                        desiredVendor = vendor;
-                        print("55${desiredVendor}");
-                      }
-                    }
+              itemCount: resData.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        seenNotifications(resData[index]["id"]);
+                        Prefs.getPrefs().then((value) {
+                          int value1 = value.getInt(PrefKey.notifyCount)!;
+                          if (value1 < 0) {
+                            value1--;
+                          }
+                          Prefs.setInt(PrefKey.notifyCount, value1);
+                        });
+                        print("object:11");
+                        String id = resData[index]["vendor_id"];
+                        print("19$id");
+                        for (var vendor in vendorData) {
+                          if (vendor["id"] == id) {
+                            desiredVendor = vendor;
+                            print("55${desiredVendor}");
+                          }
+                        }
 
-                    if (resData[index]["action"] == "Review") {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return VendorReviewScreen(
-                              profileImage: desiredVendor!["profilepic"] ??
-                                  "http://3.13.220.3/default.png",
-                              location: desiredVendor!["location"],
-                              address: desiredVendor!["address"] ?? "",
-                              vType: desiredVendor!["type"] ?? "",
-                              uType: widget.type == 1
-                                  ? widget.vId == desiredVendor!["user_id"]
-                                  ? 1
-                                  : 0
-                                  : 0,
-                              vId: desiredVendor!["id"],
-                              lat: desiredVendor!["latitude"] ?? "",
-                              lon: desiredVendor!["longitude"] ?? "",
-                              businessName:
-                              desiredVendor!["businessname"] ?? "");
-                        },
-                      ));
-                    } else if (resData[index]["action"] == "Home") {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => VandorScreen(
-                              businessName: desiredVendor!["businessname"],
-                              bio: desiredVendor!["bio"],
-                              businessHours:
-                              desiredVendor!["businesshours"],
-                              photo: desiredVendor!["profilepic"],
-                              address: desiredVendor!["address"],
-                              lat: desiredVendor!["latitude"],
-                              long: desiredVendor!["longitude"],
-                              vType: desiredVendor!["type"],
-                              id: desiredVendor!["id"],
-                              uType: widget.type,
-                              location: desiredVendor!["location"],
-                              follow: desiredVendor!["is_following"],
-                            ),
+                        if (resData[index]["action"] == "Review") {
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) {
+                              return VendorReviewScreen(
+                                  profileImage: desiredVendor!["profilepic"] ??
+                                      "http://3.13.220.3/default.png",
+                                  location: desiredVendor!["location"],
+                                  address: desiredVendor!["address"] ?? "",
+                                  vType: desiredVendor!["type"] ?? "",
+                                  uType: widget.type == 1
+                                      ? widget.vId == desiredVendor!["user_id"]
+                                          ? 1
+                                          : 0
+                                      : 0,
+                                  vId: desiredVendor!["id"],
+                                  lat: desiredVendor!["latitude"] ?? "",
+                                  lon: desiredVendor!["longitude"] ?? "",
+                                  businessName:
+                                      desiredVendor!["businessname"] ?? "");
+                            },
                           ));
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
+                        } else if (resData[index]["action"] == "Home") {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VandorScreen(
+                                  businessName: desiredVendor!["businessname"],
+                                  bio: desiredVendor!["bio"],
+                                  businessHours:
+                                      desiredVendor!["businesshours"],
+                                  photo: desiredVendor!["profilepic"],
+                                  address: desiredVendor!["address"],
+                                  lat: desiredVendor!["latitude"],
+                                  long: desiredVendor!["longitude"],
+                                  vType: desiredVendor!["type"],
+                                  id: desiredVendor!["id"],
+                                  uType: widget.type,
+                                  location: desiredVendor!["location"],
+                                  follow: desiredVendor!["is_following"],
+                                ),
+                              ));
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          // color: resData[index]["seen"] == 1
+                          //     ? AppTheme.appColor
+                          //     : const Color.fromARGB(255, 229, 100, 91),
 
-                      // color: resData[index]["seen"] == 1
-                      //     ? AppTheme.appColor
-                      //     : const Color.fromARGB(255, 229, 100, 91),
-
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                    "${resData[index]["image"]}"),
-                                radius: 25,
-                              ),
-                              SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              Row(
                                 children: [
-                                  AppText(
-                                    "${resData[index]["message"]}",
-                                    ellipsis: true,
-                                    size: 20,
-                                    bold: FontWeight.w400,
+                                  CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                        "${resData[index]["image"]}"),
+                                    radius: 25,
                                   ),
-                                  SizeBoxHeight10(),
-                                  formatTimestampWidget(
-                                      timestamp: resData[index]
-                                      ["updatedAt"]),
+                                  SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      AppText(
+                                        "${resData[index]["message"]}",
+                                        ellipsis: true,
+                                        size: 20,
+                                        bold: FontWeight.w400,
+                                      ),
+                                      SizeBoxHeight10(),
+                                      formatTimestampWidget(
+                                          timestamp: resData[index]
+                                              ["updatedAt"]),
+                                    ],
+                                  ),
                                 ],
                               ),
-
+                              resData[index]["seen"] != 1
+                                  ? CircleAvatar(
+                                      backgroundColor: Colors.yellow,
+                                      radius: 5,
+                                    )
+                                  : SizedBox()
                             ],
                           ),
-                          resData[index]["seen"] != 1?     CircleAvatar(
-                            backgroundColor: Colors.yellow,
-                            radius: 5,
-                          ): SizedBox()
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                Divider(
-                  thickness: 0.6,
-                  color: Colors.white,
-                ),
-              ],
-            );
-          }),
+                    Divider(
+                      thickness: 0.6,
+                      color: Colors.white,
+                    ),
+                  ],
+                );
+              }),
     );
   }
 

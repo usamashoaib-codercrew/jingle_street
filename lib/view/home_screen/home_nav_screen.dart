@@ -39,6 +39,7 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
   //this global Instance is for getcount of Notify from sharedPrefs inside the getProfileAPI which is called in GoogleMApScreen
   int _notifyCount = 0;
+  int _currentState = 0;
 
   //initialising firebase message plugin
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -68,6 +69,19 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     });
   }
 
+  void initLocalNotificationsForIOs() async {
+    var iosInitializationSettings = const DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
+    var initializationSetting =
+        InitializationSettings(iOS: iosInitializationSettings);
+
+    await _flutterLocalNotificationsPlugin.initialize(initializationSetting);
+  }
+
   void firebaseInit(BuildContext context) {
     FirebaseMessaging.onMessage.listen((message) {
       RemoteNotification? notification = message.notification;
@@ -82,12 +96,20 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
       if (Platform.isIOS) {
         forgroundMessage();
+        // initLocalNotificationsForIOs(context, message);
+        // showNotificationForIos(message);
       }
 
       if (Platform.isAndroid) {
         initLocalNotifications(context, message);
         showNotification(message);
       }
+
+      setState(() {
+        print("checking");
+        _notifyCount++;
+        print("checking" + _notifyCount.toString());
+      });
     });
   }
 
@@ -143,12 +165,33 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
             //  icon: largeIconPath
             );
 
+    DarwinNotificationDetails darwinNotificationDetails =
+        DarwinNotificationDetails(
+            // badgeNumber: _notifyCount,
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true);
+
+    NotificationDetails notificationDetails = NotificationDetails(
+        android: androidNotificationDetails, iOS: darwinNotificationDetails);
+
+    Future.delayed(Duration.zero, () {
+      _flutterLocalNotificationsPlugin.show(
+        0,
+        message.notification!.title.toString(),
+        message.notification!.body.toString(),
+        notificationDetails,
+      );
+    });
+  }
+
+  Future<void> showNotificationForIos(RemoteMessage message) async {
     const DarwinNotificationDetails darwinNotificationDetails =
         DarwinNotificationDetails(
             presentAlert: true, presentBadge: true, presentSound: true);
 
-    NotificationDetails notificationDetails = NotificationDetails(
-        android: androidNotificationDetails, iOS: darwinNotificationDetails);
+    NotificationDetails notificationDetails =
+        NotificationDetails(iOS: darwinNotificationDetails);
 
     Future.delayed(Duration.zero, () {
       _flutterLocalNotificationsPlugin.show(
@@ -178,18 +221,16 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
   }
 
   void handleMessage(BuildContext context, RemoteMessage message) {
-    print("object134|${message.data}");
-
     if (message.data['actions'] == 'Home') {
       for (var vendor in vendorData) {
         if (vendor["id"] == message.data["vendor_id"]) {
           desiredVendor = vendor;
           print("desired$desiredVendor");
-          handleAction(message);
+          _notifyCount = _notifyCount - 1;
+          setState(() {});
+          handleAction2(message);
         }
       }
-      print("1567");
-      handleAction2(message.data['noti_id']);
     } else if (message.data['actions'] == 'Review') {
       Map<String, dynamic> data = json.decode(message.data['Review']);
       print("100$data");
@@ -197,10 +238,12 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
         if (vendor["id"] == data["vendor_id"]) {
           desiredVendor = vendor;
           print("desired$desiredVendor");
+          _notifyCount = _notifyCount - 1;
+          print("12121$_notifyCount");
+          setState(() {});
           handleAction(message);
         }
       }
-      print("1987${message.data['actions']}");
     }
   }
 
@@ -227,14 +270,25 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     requestNotificationPermission();
     forgroundMessage();
     firebaseInit(context);
+    initLocalNotificationsForIOs();
     setupInteractMessage(context);
     getVendorProfile();
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBarField(
+      currentState: _currentState,
+      onTap: (index) {
+        setState(() {
+          _currentState = index;
+          print("123451$_notifyCount");
+          _currentState == 1 ? _notifyCount = 0 : _notifyCount;
+        });
+        //  navigateToScreen(index);
+      },
       notifyCount: _notifyCount,
       bodyList: [
         GoogleMapScreen(type: widget.type, token: widget.token),
@@ -331,27 +385,26 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     );
   }
 
-  Future<void> handleAction2(id) async {
-    print("1273${id}");
-    await seenNotifications(id);
+  Future<void> handleAction2(message) async {
+    await seenNotifications(message.data['noti_id']);
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute<void>(
-          builder: (_) => VandorScreen(
-                businessName: desiredVendor!["Slice Shop"],
-                bio: desiredVendor!["bio"],
-                businessHours: desiredVendor!["businesshours"],
-                photo: desiredVendor!["profilepic"],
-                address: desiredVendor!["address"],
-                lat: desiredVendor!["latitude"],
-                long: desiredVendor!["longitude"],
-                vType: desiredVendor!["type"],
-                id: desiredVendor!["id"],
-                uType: widget.type,
-                location: desiredVendor!["location"],
-                follow: desiredVendor!["is_following"],
-              )),
-    );
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VandorScreen(
+            businessName: desiredVendor!["businessname"],
+            bio: desiredVendor!["bio"],
+            businessHours: desiredVendor!["businesshours"],
+            photo: desiredVendor!["profilepic"],
+            address: desiredVendor!["address"],
+            lat: desiredVendor!["latitude"],
+            long: desiredVendor!["longitude"],
+            vType: desiredVendor!["type"],
+            id: desiredVendor!["id"],
+            uType: widget.type,
+            location: desiredVendor!["location"],
+            follow: desiredVendor!["is_following"],
+          ),
+        ));
   }
 }
