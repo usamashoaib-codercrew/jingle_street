@@ -148,11 +148,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      AppText(
-                                        "${resData[index]["message"]}",
-                                        ellipsis: true,
-                                        size: 20,
-                                        bold: FontWeight.w400,
+                                      Row(
+                                        children: [
+                                          AppText(
+                                            "${resData[index]["message"]}",
+                                            ellipsis: true,
+                                            size: 20,
+                                            bold: FontWeight.w400,
+                                          ),
+                                        ],
                                       ),
                                       SizeBoxHeight10(),
                                       formatTimestampWidget(
@@ -162,12 +166,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   ),
                                 ],
                               ),
-                              resData[index]["seen"] != 1
-                                  ? CircleAvatar(
-                                      backgroundColor: Colors.yellow,
-                                      radius: 5,
-                                    )
-                                  : SizedBox()
+                             Container(
+// color: Colors.black,  
+height: 33,                             child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                   resData[index]["seen"] != 1
+                                    ? CircleAvatar(
+                                        backgroundColor: Colors.yellow,
+                                        radius: 5,
+                                      )
+                                    : SizedBox()
+                                ],
+                               ),
+                             )
                             ],
                           ),
                         ),
