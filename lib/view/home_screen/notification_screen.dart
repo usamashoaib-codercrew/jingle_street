@@ -166,20 +166,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   ),
                                 ],
                               ),
-                             Container(
-// color: Colors.black,  
-height: 33,                             child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                   resData[index]["seen"] != 1
-                                    ? CircleAvatar(
-                                        backgroundColor: Colors.yellow,
-                                        radius: 5,
-                                      )
-                                    : SizedBox()
-                                ],
-                               ),
-                             )
+                              Container(
+                                height: 33,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    resData[index]["seen"] != 1
+                                        ? CircleAvatar(
+                                            backgroundColor: Colors.yellow,
+                                            radius: 5,
+                                          )
+                                        : SizedBox()
+                                  ],
+                                ),
+                              )
                             ],
                           ),
                         ),
@@ -291,5 +291,5 @@ height: 33,                             child: Column(
       print("_____$e");
       print("_____$s");
     }
-  }
+  }  
 }
