@@ -68,18 +68,18 @@ class VandorScreen extends StatefulWidget {
 
   VandorScreen(
       {super.key,
-        this.businessName,
-        this.photo,
-        this.address,
-        this.lat,
-        this.long,
-        this.vType,
-        this.id,
-        this.uType,
-        this.location,
-        this.businessHours,
-        this.bio,
-        this.follow});
+      this.businessName,
+      this.photo,
+      this.address,
+      this.lat,
+      this.long,
+      this.vType,
+      this.id,
+      this.uType,
+      this.location,
+      this.businessHours,
+      this.bio,
+      this.follow});
 
   @override
   State<VandorScreen> createState() => _VandorScreenState();
@@ -91,6 +91,7 @@ class _VandorScreenState extends State<VandorScreen> {
   AppLogger Logger = AppLogger();
   late AppDio dio;
   bool loading = false;
+  bool text = false;
 
   // var finalData;
   late Stream<List<dynamic>> _futureGetItems;
@@ -99,6 +100,7 @@ class _VandorScreenState extends State<VandorScreen> {
   void dispose() {
     super.dispose();
   }
+
   @override
   void initState() {
     dio = AppDio(context);
@@ -106,12 +108,14 @@ class _VandorScreenState extends State<VandorScreen> {
     checkIfUserIsFollowing();
     _futureGetItems = getVendorItems();
     super.initState();
-
   }
-  checkIfUserIsFollowing()async {
+
+  checkIfUserIsFollowing() async {
     var response;
-    try{
-      response = await dio.get(path: AppUrls.is_following,queryParameters: {"vendor_id" : widget.id});
+    try {
+      response = await dio.get(
+          path: AppUrls.is_following,
+          queryParameters: {"vendor_id": widget.id});
       var responseData = response.data;
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
@@ -123,14 +127,13 @@ class _VandorScreenState extends State<VandorScreen> {
           });
         }
       }
-    }
-    catch(e){
+    } catch (e) {
       print("error${e}");
     }
-
   }
+
   List<bool> isSelectedList =
-  List.generate(MenuText.length, (index) => index == 0);
+      List.generate(MenuText.length, (index) => index == 0);
 
   @override
   Widget build(BuildContext context) {
@@ -147,24 +150,29 @@ class _VandorScreenState extends State<VandorScreen> {
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
           actions: [
-            widget.uType == 0 ? isFollowing? InkWell(
-                onTap: () {
-                  favouriteVendor(context);
-                },
-                child: Icon(
-                  Icons.favorite_rounded,
-                  color: AppTheme.appColor,
-                )):
-            InkWell(
-              onTap: () {
-                favouriteVendor(context);
-              },
-              child: Icon(
-                Icons.favorite_border_outlined,
-                color: AppTheme.appColor,
-              ),
-            ):SizedBox(),
-            SizedBox(width: 30,)
+            widget.uType == 0
+                ? isFollowing
+                    ? InkWell(
+                        onTap: () {
+                          favouriteVendor(context);
+                        },
+                        child: Icon(
+                          Icons.favorite_rounded,
+                          color: AppTheme.appColor,
+                        ))
+                    : InkWell(
+                        onTap: () {
+                          favouriteVendor(context);
+                        },
+                        child: Icon(
+                          Icons.favorite_border_outlined,
+                          color: AppTheme.appColor,
+                        ),
+                      )
+                : SizedBox(),
+            SizedBox(
+              width: 30,
+            )
           ],
           centerTitle: true,
           backgroundColor: AppTheme.whiteColor,
@@ -231,74 +239,73 @@ class _VandorScreenState extends State<VandorScreen> {
                 children: [
                   widget.vType == null
                       ? SizedBox(
-                    height: 20,
-                  )
+                          height: 20,
+                        )
                       : widget.vType == 0
-                      ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AppText(
-                        "Stationary Vendor",
-                        color: Colors.white,
-                        size: 16,
-                        bold: FontWeight.bold,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          push(VendorReviewScreen(
-                            profileImage: widget.photo,
-                            address: widget.address,
-                            vType: widget.vType,
-                            uType: widget.uType,
-                            lat: widget.lat,
-                            lon: widget.long,
-                            businessName: widget.businessName,
-                            location: widget.location,
-                            vId: widget.id,
-                          ));
-                        },
-                        child: AppText(
-                          "Reviews & info",
-                          color: Colors.white,
-                          size: 16,
-                          bold: FontWeight.bold,
-                        ),
-                      )
-                    ],
-                  )
-                      : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AppText(
-                        "Mobile Vendor",
-                        color: Colors.white,
-                        size: 16,
-                        bold: FontWeight.bold,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          push(VendorReviewScreen(
-                            profileImage: widget.photo,
-                            address: widget.address,
-                            vType: widget.vType,
-                            uType: widget.uType,
-                            lat: widget.lat,
-                            lon: widget.long,
-                            businessName: widget.businessName,
-                            location: widget.location,
-                            vId: widget.id,
-
-                          ));
-                        },
-                        child: AppText(
-                          "Reviews & info",
-                          color: Colors.white,
-                          size: 16,
-                          bold: FontWeight.bold,
-                        ),
-                      )
-                    ],
-                  ),
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                AppText(
+                                  "Stationary Vendor",
+                                  color: Colors.white,
+                                  size: 16,
+                                  bold: FontWeight.bold,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    push(VendorReviewScreen(
+                                      profileImage: widget.photo,
+                                      address: widget.address,
+                                      vType: widget.vType,
+                                      uType: widget.uType,
+                                      lat: widget.lat,
+                                      lon: widget.long,
+                                      businessName: widget.businessName,
+                                      location: widget.location,
+                                      vId: widget.id,
+                                    ));
+                                  },
+                                  child: AppText(
+                                    "Reviews & info",
+                                    color: Colors.white,
+                                    size: 16,
+                                    bold: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                AppText(
+                                  "Mobile Vendor",
+                                  color: Colors.white,
+                                  size: 16,
+                                  bold: FontWeight.bold,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    push(VendorReviewScreen(
+                                      profileImage: widget.photo,
+                                      address: widget.address,
+                                      vType: widget.vType,
+                                      uType: widget.uType,
+                                      lat: widget.lat,
+                                      lon: widget.long,
+                                      businessName: widget.businessName,
+                                      location: widget.location,
+                                      vId: widget.id,
+                                    ));
+                                  },
+                                  child: AppText(
+                                    "Reviews & info",
+                                    color: Colors.white,
+                                    size: 16,
+                                    bold: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            ),
                   SizeBoxHeight5(),
                   Container(
                     decoration: BoxDecoration(
@@ -349,43 +356,159 @@ class _VandorScreenState extends State<VandorScreen> {
                           SizeBoxHeight6(),
                           widget.vType == 1
                               ? InkWell(
-                            onTap: () => GetDirectionToVendor(
-                                lat: widget.lat,
-                                long: widget.long,
-                                businessname: widget.businessName),
-                            child: Container(
-                              margin: EdgeInsets.only(
-                                left: 5,
-                              ),
-                              height: size.height * 0.1,
-                              width: size.width * 0.5,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10)),
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          "assets/images/map.png"),
-                                      fit: BoxFit.fill)),
-                            ),
-                          )
+                                  onTap: () => GetDirectionToVendor(
+                                      lat: widget.lat,
+                                      long: widget.long,
+                                      businessname: widget.businessName),
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      left: 5,
+                                    ),
+                                    height: size.height * 0.1,
+                                    // width: size.width * 0.5,
+                                    width: size.width * 0.58,
+
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(10)),
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              "assets/images/map.png"),
+                                          fit: BoxFit.fill),
+                                    ),
+                                  ),
+                                )
                               : InkWell(
-                            onTap: () => GetDirectionToVendor(
-                                lat: widget.lat,
-                                long: widget.long,
-                                businessname: widget.businessName),
-                            child: Container(
-                              margin: EdgeInsets.only(
-                                left: 5,
-                              ),
-                              height: size.height * 0.1,
-                              width: size.width * 0.5,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10)),
-                                  image: DecorationImage(
-                                      image:
-                                      NetworkImage(widget.location),
-                                      fit: BoxFit.fill)),
+                                  onTap: () => GetDirectionToVendor(
+                                      lat: widget.lat,
+                                      long: widget.long,
+                                      businessname: widget.businessName),
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      left: 5,
+                                    ),
+                                    height: size.height * 0.1,
+                                    // width: size.width * 0.5,
+                                    width: size.width * 0.58,
+
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(10)),
+                                      image: DecorationImage(
+                                          image: NetworkImage(widget.location),
+                                          fit: BoxFit.fill),
+                                    ),
+                                  ),
+                                ),
+                          SizeBoxHeight5(),
+                          Container(
+                            margin: EdgeInsets.only(
+                              left: 5,
+                            ),
+                            // height: size.height * 0.1,
+                            width: size.width * 0.58,
+                            decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10)),
+                                color: AppTheme.appColor),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 10, left: 10),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      AppText(
+                                        "Invite vendor to",
+                                        size: 18,
+                                        bold: FontWeight.w700,
+                                      ),
+                                      Row(
+                                        children: [
+                                          AppText(
+                                            "your location!",
+                                            size: 18,
+                                            bold: FontWeight.w700,
+                                          ),
+                                        ],
+                                      ),
+                                      text == false
+                                          ? Align(
+                                              alignment: Alignment.topRight,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 10, bottom: 10),
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      text = true;
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    height: 40,
+                                                    width: 100,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                        color: AppTheme
+                                                            .whiteColor),
+                                                    child: Center(
+                                                      child: AppText(
+                                                        "Invite Request",
+                                                        size: 16,
+                                                        bold: FontWeight.w800,
+                                                        color:
+                                                            AppTheme.appColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          : Align(
+                                              alignment: Alignment.topRight,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 10, bottom: 10),
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      text = false;
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    height: 40,
+                                                    width: 100,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                        color: AppTheme
+                                                            .whiteColor),
+                                                    child: Center(
+                                                      child: AppText(
+                                                        "Cancel",
+                                                        size: 16,
+                                                        bold: FontWeight.w800,
+                                                        color:
+                                                            AppTheme.appColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                    ],
+                                  ),
+                                ),
+
+                                // SizeBoxHeight10()
+                              ],
                             ),
                           ),
                           SizedBox(height: 15),
@@ -412,8 +535,8 @@ class _VandorScreenState extends State<VandorScreen> {
                                       onTap: () {
                                         setState(() {
                                           for (int i = 0;
-                                          i < isSelectedList.length;
-                                          i++) {
+                                              i < isSelectedList.length;
+                                              i++) {
                                             isSelectedList[i] = i == index;
                                           }
                                         });
@@ -425,7 +548,7 @@ class _VandorScreenState extends State<VandorScreen> {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                          BorderRadius.circular(20),
+                                              BorderRadius.circular(20),
                                           border: Border.all(
                                               color: isSelectedList[index]
                                                   ? AppTheme.appColor
@@ -437,15 +560,15 @@ class _VandorScreenState extends State<VandorScreen> {
                                         width: 110,
                                         child: Column(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                           mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                              MainAxisAlignment.center,
                                           children: [
                                             Image(
                                               height: 18,
                                               width: 44,
                                               image:
-                                              AssetImage(MenuImages[index]),
+                                                  AssetImage(MenuImages[index]),
                                             ),
                                             SizeBoxHeight3(),
                                             AppText(
@@ -497,7 +620,7 @@ class _VandorScreenState extends State<VandorScreen> {
                             children: [
                               Padding(
                                 padding:
-                                const EdgeInsets.only(left: 5.0, top: 16),
+                                    const EdgeInsets.only(left: 5.0, top: 16),
                                 child: AppText("Free Box Of Fries",
                                     size: 17,
                                     bold: FontWeight.bold,
@@ -785,7 +908,7 @@ class _VandorScreenState extends State<VandorScreen> {
       print("_____$s");
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content:
-        Text('Failed to load data. Please check your internet connection.'),
+            Text('Failed to load data. Please check your internet connection.'),
       ));
     }
     yield _profile;
@@ -793,8 +916,8 @@ class _VandorScreenState extends State<VandorScreen> {
 
   GetDirectionToVendor(
       {required double lat,
-        required double long,
-        required String businessname}) async {
+      required double long,
+      required String businessname}) async {
     try {
       if (Platform.isIOS) {
         final url = 'https://maps.google.com/?q=$lat,$long';
@@ -824,7 +947,6 @@ class _VandorScreenState extends State<VandorScreen> {
     }
   }
 
-
   favouriteVendor(context) async {
     ProgressDialog progressDialog = ProgressDialog(
       context: context,
@@ -851,11 +973,9 @@ class _VandorScreenState extends State<VandorScreen> {
 
         print("resData$resData");
         setState(() {
-          if(resData["message"] == "Unliked")
-          {
+          if (resData["message"] == "Unliked") {
             isFollowing = false;
-          }
-          else{
+          } else {
             isFollowing = true;
           }
         });
@@ -873,6 +993,4 @@ class _VandorScreenState extends State<VandorScreen> {
           .show(context);
     }
   }
-
-
 }
