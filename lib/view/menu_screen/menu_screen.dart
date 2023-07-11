@@ -13,6 +13,7 @@ import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/app_button.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
+import 'package:jingle_street/view/home_screen/track_system/track_vendor.dart';
 import 'package:jingle_street/view/menu_screen/burgers_builder_screen.dart';
 import 'package:jingle_street/view/menu_screen/dessert_builder_screen.dart';
 import 'package:jingle_street/view/menu_screen/drinks_builder.dart';
@@ -97,6 +98,7 @@ class _VandorScreenState extends State<VandorScreen> {
   // var finalData;
   late Stream<List<dynamic>> _futureGetItems;
   bool isFollowing = false;
+
   @override
   void dispose() {
     super.dispose();
@@ -397,79 +399,100 @@ class _VandorScreenState extends State<VandorScreen> {
                                   ),
                                 ),
                           SizedBox(height: 15),
-                       widget.vType==1? widget.uType==0?  Container(
-                            margin: EdgeInsets.only(
-                              left: 5,
-                            ),
-                            height: size.height * 0.1,
-                            width: size.width * 0.6,
-                            decoration: BoxDecoration(
-                              color: AppTheme.appColor,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      AppText(
-                                        "Invite Vendors to",
-                                        size: 18,
-                                        bold: FontWeight.bold,
+                          widget.vType == 1
+                              ? widget.uType == 0
+                                  ? Container(
+                                      margin: EdgeInsets.only(
+                                        left: 5,
                                       ),
-                                      AppText(
-                                        "your Location!",
-                                        size: 18,
-                                        bold: FontWeight.bold,
-                                      )
-                                    ],
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      reqButton == false
-                                          ? AppButton(
-                                              onPressed: () {
-                                            
-                                                setState(() {
-                                                reqButton = true;
+                                      height: size.height * 0.1,
+                                      width: size.width * 0.6,
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.appColor,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                AppText(
+                                                  "Invite Vendors to",
+                                                  size: 18,
+                                                  bold: FontWeight.bold,
+                                                ),
+                                                AppText(
+                                                  "your Location!",
+                                                  size: 18,
+                                                  bold: FontWeight.bold,
+                                                )
+                                              ],
+                                            ),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                reqButton == false
+                                                    ? AppButton(
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            reqButton = true;
 
-                                                });
-                                              },
-                                              text: "Invite Request",
-                                              width: 105,
-                                              btnColor: AppTheme.whiteColor,
-                                              textColor: AppTheme.appColor,
-                                              textSize: 14,
-                                              fontweight: FontWeight.bold,
+                                                          });
+                                                          Navigator.of(
+                                                              context)
+                                                              .push(
+                                                              MaterialPageRoute(
+                                                                builder:
+                                                                    (context) {
+                                                                  return TrackUser();
+                                                                },
+                                                              ));
+                                                        },
+                                                        text: "Invite Request",
+                                                        width: 105,
+                                                        btnColor:
+                                                            AppTheme.whiteColor,
+                                                        textColor:
+                                                            AppTheme.appColor,
+                                                        textSize: 14,
+                                                        fontweight:
+                                                            FontWeight.bold,
+                                                      )
+                                                    : AppButton(
+                                                        onPressed: () {
+
+                                                          setState(() {
+                                                            reqButton = false;
+                                                          });
+
+                                                        },
+                                                        text: "Cancel",
+                                                        width: 105,
+                                                        btnColor:
+                                                            AppTheme.whiteColor,
+                                                        textColor:
+                                                            AppTheme.appColor,
+                                                        textSize: 14,
+                                                        fontweight:
+                                                            FontWeight.bold,
+                                                      )
+                                              ],
                                             )
-                                          : AppButton(
-                                              onPressed: () {
-                                                setState(() {
-                                                reqButton=  false;
-                                                });
-                                              },
-                                              text: "Cancel",
-                                              width: 105,
-                                              btnColor: AppTheme.whiteColor,
-                                              textColor: AppTheme.appColor,
-                                              textSize: 14,
-                                              fontweight: FontWeight.bold,
-                                            )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ):SizedBox():SizedBox(),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox()
+                              : SizedBox(),
                           SizedBox(height: 15),
                           AppText("Choose the",
                               size: 16, color: AppTheme.appColor),
