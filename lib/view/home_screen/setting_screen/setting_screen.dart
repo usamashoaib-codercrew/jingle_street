@@ -32,6 +32,7 @@ class _SettingScreenState extends State<SettingScreen> {
     dio = AppDio(context);
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -54,12 +55,11 @@ class _SettingScreenState extends State<SettingScreen> {
                       children: [
                         InkWell(
                             onTap: () {
-                              if(widget.type == 1){
+                              if (widget.type == 1) {
                                 push(VendorProfile());
                               } else {
                                 push(CustomerProfileEdit());
                               }
-
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -78,53 +78,6 @@ class _SettingScreenState extends State<SettingScreen> {
                               ],
                             )),
                         SizeBoxHeight3(),
-                        Container(
-                            color: AppTheme.appColor,
-                            height: 1,
-                            width: size.width),
-                        SizeBoxHeight10(),
-                        InkWell(
-                          onTap: () {
-                            push(HelpScreen());
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              AppText(
-                                "Help",
-                                size: 16,
-                                bold: FontWeight.w700,
-                                color: AppTheme.appColor,
-                              ),
-                              Icon(
-                                Icons.help_outline,
-                                size: 22,
-                                color: AppTheme.appColor,
-                              )
-                            ],
-                          ),
-                        ),
-                        SizeBoxHeight3(),
-                        Container(
-                            color: AppTheme.appColor,
-                            height: 1,
-                            width: size.width),
-                        SizeBoxHeight10(),
-                        InkWell(
-                          onTap: () {
-                            push(ContactScreen());
-                          },
-                          child: Row(
-                            children: [
-                              AppText(
-                                "Contact us",
-                                size: 16,
-                                bold: FontWeight.w700,
-                                color: AppTheme.appColor,
-                              ),
-                            ],
-                          ),
-                        ),
                         SizeBoxHeight3(),
                         Container(
                             color: AppTheme.appColor,
@@ -137,7 +90,9 @@ class _SettingScreenState extends State<SettingScreen> {
                                 context: context,
                                 builder: (context) {
                                   return SimpleDialog(
-                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     contentPadding: EdgeInsets.zero,
                                     backgroundColor: AppTheme.appColor,
                                     children: [
@@ -179,12 +134,15 @@ class _SettingScreenState extends State<SettingScreen> {
                                                   onTap: () async {
                                                     // await logoutUser();
                                                     await removeAuthToken();
-                                                    Navigator.of(context).popUntil((route) => route.isFirst);
+                                                    Navigator.of(context)
+                                                        .popUntil((route) =>
+                                                            route.isFirst);
                                                     replace(LoginScreen());
                                                   },
                                                   child: Container(
                                                     height: 50,
-                                                    width: 150/size.width*150,
+                                                    width:
+                                                        150 / size.width * 150,
                                                     child: Center(
                                                       child: Text(
                                                         "Yes",
@@ -212,7 +170,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                                   },
                                                   child: Container(
                                                     height: 40,
-                                                    width: 150/size.width* 150,
+                                                    width:
+                                                        150 / size.width * 150,
                                                     child: Center(
                                                       child: Text(
                                                         "No",
@@ -254,13 +213,12 @@ class _SettingScreenState extends State<SettingScreen> {
                       ]),
                 ))));
   }
+
   removeAuthToken() async {
     try {
-      final response = await dio.post(
-          path: AppUrls.updatefcmToken,
-          data: {
-            'fcm': "",
-          });
+      final response = await dio.post(path: AppUrls.updatefcmToken, data: {
+        'fcm': "",
+      });
       print("fksjlfks${response.data}");
       if (response.statusCode == StatusCode.OK) {
         print("FCM TOKEN HAS BEEN REMOVED SUCCESSFULLY");

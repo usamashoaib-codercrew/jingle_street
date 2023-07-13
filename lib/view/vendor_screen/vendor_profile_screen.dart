@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'package:dialogs/dialogs/message_dialog.dart';
 import 'package:dialogs/dialogs/progress_dialog.dart';

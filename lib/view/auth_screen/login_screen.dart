@@ -18,6 +18,7 @@ import 'package:jingle_street/resources/widgets/fields/password_field.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
+import 'package:jingle_street/view/auth_screen/forgot_password_screen.dart';
 import 'package:jingle_street/view/auth_screen/otp_screen.dart';
 import 'package:jingle_street/view/auth_screen/signup_screen.dart';
 import 'package:jingle_street/view/home_screen/home_nav_screen.dart';
@@ -45,7 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   String userEmail = '';
-
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   Future<String> getDeviceToken() async {
@@ -225,41 +225,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: 15,
                           controller: _passwordController),
                       SizeBoxHeight4(),
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //   children: [
-                      //     AppCheckBox(
-                      //       hoverColor: AppTheme.appColor,
-                      //       activeColor: Colors.white,
-                      //       borderSidewidth: 0.1,
-                      //       borderSideColor: AppTheme.appColor,
-                      //       focusColor: AppTheme.appColor,
-                      //       checkColor: AppTheme.appColor,
-                      //       value: _isChecked,
-                      //       onChanged: (val) {
-                      //         _handleRememberMe(val!);
-                      //         // saveLoginData(val!);
-                      //       },
-                      //     ),
-                      //     Expanded(
-                      //       child: AppText("Remember me",
-                      //           color: AppTheme.appColor, size: 15),
-                      //     ),
-                      //     // AppText(
-                      //     //   "Forgot password?",
-                      //     //   color: AppTheme.appColor,
-                      //     //   size: 12,
-                      //     //   onTap: () {
-                      //     //     Navigator.push(
-                      //     //         context,
-                      //     //         MaterialPageRoute(
-                      //     //           builder: (context) =>
-                      //     //               SetPasswordByPhoneNumber(),
-                      //     //         ));
-                      //     //   },
-                      //     // ),
-                      //   ],
-                      // ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: AppText(
+                          "Forgot password?",
+                          color: AppTheme.appColor,
+                          size: 12,
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      SetPasswordByPhoneNumber(),
+                                ));
+                          },
+                        ),
+                      ),
                       SizedBox(
                         height: 40,
                       ),
@@ -408,7 +389,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   id: data['id'],
                 ));
               } else if (data['type'] == 0 && _isCustomer == true) {
-                replace(HomeNavScreen(type: data['type'],id: data['id'],));
+                replace(HomeNavScreen(
+                  type: data['type'],
+                  id: data['id'],
+                ));
               } else {
                 MessageDialog(
                         title: "Select",

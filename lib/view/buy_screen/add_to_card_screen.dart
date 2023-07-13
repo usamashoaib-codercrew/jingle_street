@@ -2,12 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/app_button.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
-import 'package:jingle_street/view/buy_screen/cart_confirm_order_screen.dart';
 import 'package:jingle_street/view/menu_screen/video_player_screen.dart';
 import 'package:page_view_indicators/circle_page_indicator.dart';
 import 'package:provider/provider.dart';
@@ -92,14 +90,6 @@ class _AddToCardScreenState extends State<AddToCardScreen> {
     }
     String updateJsonString = jsonEncode(itemsList);
     await prefs.setString('myItemsList', updateJsonString);
-
-    // List<Map<String, dynamic>> itemsMergedListNew = List<Map<String, dynamic>>.from(itemsMergedList);
-    // itemsMergedListNew.add(newItem);
-
-    // itemsList.addAll(itemsMergedListNew);
-
-    // addToCartItems();
-    // setState(() {});
   }
 
   @override

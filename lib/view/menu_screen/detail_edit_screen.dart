@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
-import 'package:jingle_street/config/functions/provider.dart';
+import 'package:jingle_street/providers/Item_referesh_provider.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/app_button.dart';

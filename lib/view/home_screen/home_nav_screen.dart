@@ -11,7 +11,6 @@ import 'package:jingle_street/config/dio/app_dio.dart';
 import 'package:jingle_street/config/keys/pref_keys.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/resources/widgets/fields/bottom_navigation_bar_field.dart';
-import 'package:jingle_street/view/buy_screen/cart_confirm_order_screen.dart';
 import 'package:jingle_street/view/home_screen/google_map_screen.dart';
 import 'package:jingle_street/view/home_screen/notification_screen.dart';
 import 'package:jingle_street/view/home_screen/setting_screen/setting_screen.dart';
@@ -270,7 +269,9 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     requestNotificationPermission();
     forgroundMessage();
     firebaseInit(context);
-    initLocalNotificationsForIOs();
+    if (Platform.isIOS) {
+      initLocalNotificationsForIOs();
+    }
     setupInteractMessage(context);
     getVendorProfile();
 

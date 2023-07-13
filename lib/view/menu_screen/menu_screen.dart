@@ -6,7 +6,7 @@ import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/connectivity/connectivity.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
 import 'package:jingle_street/config/functions/navigator_functions.dart';
-import 'package:jingle_street/config/functions/provider.dart';
+import 'package:jingle_street/providers/Item_referesh_provider.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/config/logger/app_logger.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';

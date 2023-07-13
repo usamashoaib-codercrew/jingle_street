@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jingle_street/config/functions/navigator_functions.dart';
-import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
