@@ -4,23 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
-import 'package:jingle_street/config/app_urls.dart';
-import 'package:jingle_street/config/dio/app_dio.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:jingle_street/config/functions/provider.dart';
-import 'package:jingle_street/config/keys/pref_keys.dart';
-import 'package:jingle_street/config/keys/response_code.dart';
-import 'package:jingle_street/model/notifications.dart';
 import 'package:jingle_street/providers/cart_counter.dart';
+import 'package:jingle_street/providers/request_timer.dart';
 import 'package:jingle_street/providers/total_counter_provider.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
-import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
-import 'package:jingle_street/view/notifications_testing.dart';
 import 'package:provider/provider.dart';
-import 'package:req_fun/req_fun.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'view/startup_screen/splash_screen.dart';
 
 void main() async {
@@ -48,16 +41,19 @@ void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
+    MobileAds.instance.initialize();
+    // FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   } on FirebaseException catch (e) {
     print('Error initializing Firebase: ${e.message}');
     // Handle the error here
   }
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<BoolProvider>(create: (_) => BoolProvider()),
         ChangeNotifierProvider<CartCounter>(create: (_) => CartCounter()),
+        ChangeNotifierProvider<TimerProvider>(create: (_) => TimerProvider()),
+
         ChangeNotifierProvider<TotalCounterProvider>(
             create: (_) => TotalCounterProvider()),
         // ChangeNotifierProvider<GetVendorProductsProvider>(create: (_) => GetVendorProductsProvider()),
@@ -66,6 +62,24 @@ void main() async {
     ),
   );
 }
+
+
+// FirebaseMessaging messagingMain = FirebaseMessaging.instance;
+// final fcmToken = await messagingMain.getToken();
+// print("FCM token is ${fcmToken}");
+// SharedPreferences _prefs = await SharedPreferences.getInstance();
+// FirebaseMessaging.instance.getToken().then((token) {
+// print('This is Token: ' '${token}');
+// _prefs.setString("fcm_token", token!);
+// });
+// messagingMain.onTokenRefresh.listen((event) {
+// print("klsdlkfjl$event");
+// event.toString();
+// if (kDebugMode) {
+// print('refresh');
+// }
+// _prefs.setString("fcm_token", event);
+// });
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -118,10 +132,3 @@ class _MyAppState extends State<MyApp> {
     });
   }
 }
-
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   int _notifyCount = 0;
-//      _notifyCount++;
-//      print("178$_notifyCount");  
- 
-// }

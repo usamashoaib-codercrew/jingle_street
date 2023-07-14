@@ -62,7 +62,6 @@ class _TrackUserState extends State<TrackUser> {
       }
       if(mounted){
         setState(() {
-
         });
       }
 

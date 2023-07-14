@@ -17,8 +17,9 @@ import 'package:jingle_street/view/home_screen/notification_screen.dart';
 import 'package:jingle_street/view/home_screen/setting_screen/setting_screen.dart';
 import 'package:jingle_street/view/menu_screen/menu_screen.dart';
 import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
+import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeNavScreen extends StatefulWidget {
   final int? type;
@@ -40,6 +41,7 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
   //this global Instance is for getcount of Notify from sharedPrefs inside the getProfileAPI which is called in GoogleMApScreen
   int _notifyCount = 0;
   int _currentState = 0;
+  final Logger logger = Logger();
 
   //initialising firebase message plugin
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -84,6 +86,7 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
   void firebaseInit(BuildContext context) {
     FirebaseMessaging.onMessage.listen((message) {
+      // print("message_delivers ${message.data}");
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification!.android;
 
@@ -107,8 +110,7 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
       setState(() {
         print("checking");
-        _notifyCount++;
-        print("checking" + _notifyCount.toString());
+        _currentState != 1 ? _notifyCount++ : _notifyCount;
       });
     });
   }
@@ -221,6 +223,8 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
   }
 
   void handleMessage(BuildContext context, RemoteMessage message) {
+    print("object134|${message.data}");
+
     if (message.data['actions'] == 'Home') {
       for (var vendor in vendorData) {
         if (vendor["id"] == message.data["vendor_id"]) {
@@ -228,6 +232,7 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
           print("desired$desiredVendor");
           _notifyCount = _notifyCount - 1;
           setState(() {});
+          // _notifyCount= _notifyCount-1;
           handleAction2(message);
         }
       }
@@ -237,13 +242,13 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       for (var vendor in vendorData) {
         if (vendor["id"] == data["vendor_id"]) {
           desiredVendor = vendor;
-          print("desired$desiredVendor");
           _notifyCount = _notifyCount - 1;
           print("12121$_notifyCount");
           setState(() {});
           handleAction(message);
         }
       }
+      print("1987${message.data['actions']}");
     }
   }
 
@@ -268,12 +273,14 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     dio = AppDio(context);
     notfiyCountFunction();
     requestNotificationPermission();
+    if(Platform.isIOS){
+      initLocalNotificationsForIOs();
+    }
+
     forgroundMessage();
     firebaseInit(context);
-    initLocalNotificationsForIOs();
     setupInteractMessage(context);
     getVendorProfile();
-
     super.initState();
   }
 
@@ -284,7 +291,6 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       onTap: (index) {
         setState(() {
           _currentState = index;
-          print("123451$_notifyCount");
           _currentState == 1 ? _notifyCount = 0 : _notifyCount;
         });
         //  navigateToScreen(index);
@@ -387,7 +393,6 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
   Future<void> handleAction2(message) async {
     await seenNotifications(message.data['noti_id']);
-
     Navigator.push(
         context,
         MaterialPageRoute(
