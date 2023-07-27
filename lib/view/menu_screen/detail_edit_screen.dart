@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
-import 'package:jingle_street/config/functions/provider.dart';
+import 'package:jingle_street/providers/Item_referesh_provider.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/app_button.dart';
@@ -144,37 +144,6 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                             },
                           );
                         } else if (widget.img[index]['type'] == 1) {
-                          print(
-                              "getting_thumbnails_of_videos ${widget.img[index]['thumbnail']}");
-                          // apiChewieController = ChewieController(
-                          //   allowFullScreen: false,
-                          //   videoPlayerController:
-                          //       VideoPlayerController.network(
-                          //     widget.img[index]['url'],
-                          //   ),
-                          //   autoPlay: false,
-                          //   looping: false,
-                          //   autoInitialize: true,
-                          //   placeholder: Center(
-                          //     child: CircularProgressIndicator(
-                          //       color: AppTheme.appColor,
-                          //     ),
-                          //   ),
-                          //   errorBuilder: (context, errorMessage) {
-                          //     return Center(
-                          //       child: Text(
-                          //         'Failed to load video. Please try again.',
-                          //         style: TextStyle(color: Colors.white),
-                          //       ),
-                          //     );
-                          //   },
-                          // );
-                          // return AspectRatio(
-                          //   aspectRatio: 16 / 9,
-                          //   child: Chewie(
-                          //     controller: apiChewieController,
-                          //   ),
-                          // );
                           return Stack(
                             alignment: Alignment.center,
                             children: [
@@ -536,45 +505,6 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       }
     }
   }
-  // Widget _buildMediaPreview(dynamic media) {
-  //   final String path = media.path;
-  //   final bool isImage = ['.jpg', '.jpeg', '.png'].any(
-  //     (extension) => path.toLowerCase().endsWith(extension),
-  //   );
-  //
-  //   if (isImage) {
-  //     return Image.file(
-  //       File(media.path),
-  //       fit: BoxFit.cover,
-  //     );
-  //   } else {
-  //     assetVideoController = VideoPlayerController.file(File(media.path));
-  //     assetChewieController = ChewieController(
-  //       allowFullScreen: false,
-  //       videoPlayerController: assetVideoController,
-  //       autoPlay: false,
-  //       looping: false,
-  //       autoInitialize: true,
-  //       placeholder: Center(
-  //         child: CircularProgressIndicator(color: AppTheme.appColor),
-  //       ),
-  //       errorBuilder: (context, errorMessage) {
-  //         return Center(
-  //           child: Text(
-  //             'Failed to load video. Please try again.',
-  //             style: TextStyle(color: Colors.white),
-  //           ),
-  //         );
-  //       },
-  //     );
-  //     return AspectRatio(
-  //       aspectRatio: 16 / 9,
-  //       child: Chewie(
-  //         controller: assetChewieController,
-  //       ),
-  //     );
-  //   }
-  // }
   Widget _buildMediaPreview(dynamic media) {
     if (media is XFile) {
       // Display the image
@@ -626,70 +556,6 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       }
     }
   }
-
-  // Future<void> addGalleryItems(List<dynamic> galleryMediaList) async {
-  //   ProgressDialog progressDialog = ProgressDialog(
-  //     context: context,
-  //     backgroundColor: Colors.white,
-  //     textColor: AppTheme.appColor,
-  //   );
-  //   progressDialog.show();
-  //   loading = true;
-  //
-  //   bool success = true; // Track the success of adding all items
-  //
-  //   try {
-  //     for (dynamic media in galleryMediaList) {
-  //       List<File> files = [];
-  //
-  //       if (media is XFile) {
-  //         files.add(File(media.path));
-  //       }
-  //
-  //       final bool hasImages = files.any(
-  //         (file) => ['.jpg', '.jpeg', '.png'].any(
-  //           (extension) => file.path.toLowerCase().endsWith(extension),
-  //         ),
-  //       );
-  //
-  //       final int type =
-  //           hasImages ? 0 : 1; // Swapped the type values for images and videos
-  //
-  //       final formData = FormData.fromMap({
-  //         'type': type,
-  //         'item_id': widget.itemId,
-  //         'file': files
-  //             .map((file) => MultipartFile.fromFileSync(file.path))
-  //             .toList(),
-  //       });
-  //
-  //       final response = await dio.post(
-  //         path: AppUrls.addItemImage,
-  //         data: formData,
-  //       );
-  //
-  //       if (response.statusCode != StatusCode.OK) {
-  //         success = false; // Mark the success as false if any item fails to add
-  //         break; // Exit the loop if an item fails
-  //       }
-  //     }
-  //   } catch (e, stackTrace) {
-  //     print('addItemImage API exception: $e\nStack trace: $stackTrace');
-  //     success = false; // Mark the success as false if an exception occurs
-  //   } finally {
-  //     progressDialog.dismiss();
-  //
-  //     if (success) {
-  //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text('Items added successfully'),
-  //       ));
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text('Something went wrong, please try again!'),
-  //       ));
-  //     }
-  //   }
-  // }
   Future<void> addGalleryItems(List<dynamic> galleryMediaList) async {
     ProgressDialog progressDialog = ProgressDialog(
       context: context,

@@ -22,6 +22,7 @@ class PrefKey {
   static const String sortCode = "sort_code";
   static const String accountNumber = "account_number";
   static const String authorizationStatus = "authorization_status";
+  static const String nottifyCount = "notifyCount";
 
 
   static const String slug = "slug";

@@ -6,33 +6,45 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:jingle_street/Admob/ad_helper.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
+import 'package:jingle_street/config/keys/pref_keys.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
+import 'package:jingle_street/main.dart';
 import 'package:jingle_street/resources/widgets/fields/bottom_navigation_bar_field.dart';
-import 'package:jingle_street/view/buy_screen/cart_confirm_order_screen.dart';
 import 'package:jingle_street/view/home_screen/google_map_screen.dart';
 import 'package:jingle_street/view/home_screen/notification_screen.dart';
 import 'package:jingle_street/view/home_screen/setting_screen/setting_screen.dart';
+import 'package:jingle_street/view/menu_screen/menu_screen.dart';
 import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
+import 'package:req_fun/req_fun.dart';
+
+import '../../resources/global_variables.dart';
 
 class HomeNavScreen extends StatefulWidget {
   final int? type;
   final String? token;
   final String? name;
   final String? id;
-  const HomeNavScreen({Key? key, this.type, this.token, this.name, this.id}) : super(key: key);
+  final  index;
+  const HomeNavScreen({Key? key, this.type, this.token, this.name, this.id, this.index})
+      : super(key: key);
 
   @override
   State<HomeNavScreen> createState() => _HomeNavScreenState();
 }
 
 class _HomeNavScreenState extends State<HomeNavScreen> {
-
   late AppDio dio;
   List<dynamic> vendorData = [];
   Map<String, dynamic>? desiredVendor;
+
+  //this global Instance is for getcount of Notify from sharedPrefs inside the getProfileAPI which is called in GoogleMApScreen
+  int _currentState = 0 ;
+  final Logger logger = Logger();
 
   //initialising firebase message plugin
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -46,7 +58,13 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       BuildContext context, RemoteMessage message) async {
     var androidInitializationSettings =
     const AndroidInitializationSettings('@mipmap/ic_launcher');
-    var iosInitializationSettings = const DarwinInitializationSettings();
+    var iosInitializationSettings = const DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      defaultPresentSound: true,
+      defaultPresentAlert: true
+    );
 
     var initializationSetting = InitializationSettings(
         android: androidInitializationSettings, iOS: iosInitializationSettings);
@@ -58,26 +76,32 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
         });
   }
 
+  void initLocalNotificationsForIOs() async {
+    var iosInitializationSettings = const DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
+    var initializationSetting =
+    InitializationSettings(iOS: iosInitializationSettings);
+
+    await _flutterLocalNotificationsPlugin.initialize(initializationSetting);
+  }
+
   void firebaseInit(BuildContext context) {
     FirebaseMessaging.onMessage.listen((message) {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification!.android;
-
-      if (kDebugMode) {
-        print("notifications title:${notification!.title}");
-        print("notifications body:${notification.body}");
-        print('count:${android!.count}');
-        print('data:${message.data.toString()}');
-      }
-
       if (Platform.isIOS) {
-        forgroundMessage();
+         showNotificationForIos(message);
       }
-
       if (Platform.isAndroid) {
         initLocalNotifications(context, message);
         showNotification(message);
       }
+
+      setState(() {
+        _currentState != 1 ? GlobalVariables.nottifyCount++ : GlobalVariables.nottifyCount;
+      });
     });
   }
 
@@ -94,17 +118,14 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       if (kDebugMode) {
-        print('user granted permission');
       }
     } else if (settings.authorizationStatus ==
         AuthorizationStatus.provisional) {
       if (kDebugMode) {
-        print('user granted provisional permission');
       }
     } else {
       //appsetting.AppSettings.openNotificationSettings();
       if (kDebugMode) {
-        print('user denied permission');
       }
     }
   }
@@ -117,6 +138,7 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       importance: Importance.max,
       showBadge: true,
       playSound: true,
+
       // sound: const RawResourceAndroidNotificationSound('jetsons_doorbell')
     );
 
@@ -133,9 +155,12 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       //  icon: largeIconPath
     );
 
-    const DarwinNotificationDetails darwinNotificationDetails =
+    DarwinNotificationDetails darwinNotificationDetails =
     DarwinNotificationDetails(
-        presentAlert: true, presentBadge: true, presentSound: true);
+      // badgeNumber: _notifyCount,
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true);
 
     NotificationDetails notificationDetails = NotificationDetails(
         android: androidNotificationDetails, iOS: darwinNotificationDetails);
@@ -150,22 +175,14 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     });
   }
 
-  //function to get device token on which we will send the notifications
-  Future<String> getDeviceToken() async {
-    String? token = await messaging.getToken();
-    print("ajksdlajs${token}");
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.setString("fcm_token", token!);
-    return token;
-  }
+  Future<void> showNotificationForIos(RemoteMessage message) async {
+     DarwinNotificationDetails darwinNotificationDetails =
+    DarwinNotificationDetails(
+        presentAlert: true, presentBadge: true, presentSound: true,);
 
-  void isTokenRefresh() async {
-    messaging.onTokenRefresh.listen((event) {
-      event.toString();
-      if (kDebugMode) {
-        print('refresh');
-      }
-    });
+    NotificationDetails notificationDetails =
+    NotificationDetails(iOS: darwinNotificationDetails);
+_flutterLocalNotificationsPlugin.show(0, "", "", notificationDetails);
   }
 
   //handle tap on notification when app is in background or terminated
@@ -180,54 +197,38 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
 
     //when app ins background
     FirebaseMessaging.onMessageOpenedApp.listen((event) {
-      print("evernt_is ${event}");
       handleMessage(context, event);
     });
   }
 
   void handleMessage(BuildContext context, RemoteMessage message) {
+
     if (message.data['actions'] == 'Home') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute<void>(
-            builder: (_) =>
-                HomeNavScreen(type: widget.type, token: widget.token)
-        ),
-      );
-    } else if(message.data['actions'] == 'Review') {
+      for (var vendor in vendorData) {
+        if (vendor["id"] == message.data["vendor_id"]) {
+          desiredVendor = vendor;
+          GlobalVariables.nottifyCount>0?  GlobalVariables.nottifyCount = GlobalVariables.nottifyCount - 1:GlobalVariables.nottifyCount = 0;
+          setState(() {});
+          // _notifyCount= _notifyCount-1;
+          handleAction2(message);
+        }
+      }
+    } else if (message.data['actions'] == 'Review') {
       Map<String, dynamic> data = json.decode(message.data['Review']);
       for (var vendor in vendorData) {
         if (vendor["id"] == data["vendor_id"]) {
           desiredVendor = vendor;
-          if (message.data['actions'] == 'Review') {
-            Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    VendorReviewScreen(
-                      businessName: desiredVendor!["businessname"],
-                      profileImage: desiredVendor!["profilepic"],
-                      address: desiredVendor!["address"],
-                      vType: desiredVendor!["type"],
-                      uType: widget.type == 1 ? 1 : 0,
-                      lat: desiredVendor!["latitude"],
-                      lon: desiredVendor!["longitude"],
-                      vId: desiredVendor!["id"],
-                      location: desiredVendor!["location"],
-                    ),
-              ),
-            );
-          } else {
-            print("not navigated");
-          }
+          GlobalVariables.nottifyCount>0?  GlobalVariables.nottifyCount = GlobalVariables.nottifyCount - 1:GlobalVariables.nottifyCount =0;
+
+
+          setState(() {});
+          handleAction(message);
         }
       }
     }
   }
-
-
   Future forgroundMessage() async {
-    await FirebaseMessaging.instance
+    FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
@@ -235,42 +236,103 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
     );
   }
 
+  notfiyCountFunction() {
+    Prefs.getPrefs().then((value) {
+      int value1 = value.getInt(PrefKey.nottifyCount)!;
+      GlobalVariables.nottifyCount = value1;
+    });
+  }
+
+  // interstitial add variable
+  InterstitialAd? _interstitialAd;
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          setState(() {
+            _interstitialAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
   @override
   void initState() {
+    if (widget.index!= null){
+
+      _currentState = widget.index;
+    }
+    _loadInterstitialAd();
+
+    // Show the InterstitialAd after a certain delay (e.g., 5 seconds)seconds
+    Future.delayed(Duration(seconds: 5), () {
+      if (_interstitialAd != null) {
+        _interstitialAd!.show();
+      }
+    });
+
     dio = AppDio(context);
+    notfiyCountFunction();
     requestNotificationPermission();
+    if(Platform.isIOS){
+      initLocalNotificationsForIOs();
+    }
+
+    // handleBackgroundNotifications();
     forgroundMessage();
     firebaseInit(context);
+    // FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     setupInteractMessage(context);
     getVendorProfile();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBarField(
+      currentState: _currentState,
+      onTap: (index) {
+        setState(() {
+          _currentState = index;
+          _currentState == 1 ? GlobalVariables.nottifyCount = 0 : GlobalVariables.nottifyCount;
+        });
+        //  navigateToScreen(index);
+      },
+      notifyCount: GlobalVariables.nottifyCount,
       bodyList: [
-        GoogleMapScreen(type: widget.type,token: widget.token),
-        NotificationScreen(type: widget.type, token: widget.token, vId: widget.id,),
-        SettingScreen(type: widget.type,name: widget.name, ),
-      ],
-      iconData: [
-        Icons.home,
-        Icons.notifications_none,
-        Icons.settings,
+        GoogleMapScreen(type: widget.type, token: widget.token),
+        Stack(
+          children: [
+            NotificationScreen(
+              type: widget.type,
+              token: widget.token,
+              vId: widget.id,
+            ),
+          ],
+        ),
+        SettingScreen(
+          type: widget.type,
+          name: widget.name,
+        ),
       ],
     );
   }
 
   //getting all the vendors api
   getVendorProfile() async {
-    print("111111");
     var response;
     try {
       response = await dio.get(
         path: AppUrls.getVendor,
       );
       var responseData = response.data;
-      print("145{$responseData['data]['vendors]}".length);
       if (response.statusCode == StatusCode.BAD_REQUEST) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Server Down')));
@@ -278,7 +340,6 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
         var resData = responseData;
         if (resData['status'] == true) {
           vendorData = responseData['data']['vendors'];
-          print("11${vendorData.length}");
           setState(() {});
         }
       }
@@ -287,29 +348,72 @@ class _HomeNavScreenState extends State<HomeNavScreen> {
       print("_____$s");
     }
   }
+
 //ends
+  seenNotifications(id) async {
+    var response;
+    try {
+      response = await dio.post(path: AppUrls.seenNotification, data: {
+        'noti_id': id,
+      });
+      var responseData = response.data;
 
+      if (response.statusCode == StatusCode.BAD_REQUEST) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Server Down')));
+      } else if (response.statusCode == StatusCode.OK) {
+        var resData = responseData;
+        if (resData['status'] == true) {
+        }
+      }
+    } catch (e, s) {
+      print("_____$e");
+      print("_____$s");
+    }
+  }
+
+  Future<void> handleAction(message) async {
+    await seenNotifications(message.data["noti_id"]);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => VendorReviewScreen(
+          businessName: desiredVendor!["businessname"],
+          profileImage: desiredVendor!["profilepic"],
+          address: desiredVendor!["address"],
+          vType: desiredVendor!["type"],
+          uType: widget.type == 1
+              ? (widget.id == desiredVendor!["user_id"] ? 1 : 0)
+              : 0,
+          lat: desiredVendor!["latitude"],
+          lon: desiredVendor!["longitude"],
+          vId: desiredVendor!["id"],
+          location: desiredVendor!["location"],
+        ),
+      ),
+    );
+  }
+
+  Future<void> handleAction2(message) async {
+    await seenNotifications(message.data['noti_id']);
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VandorScreen(
+            businessName: desiredVendor!["businessname"],
+            bio: desiredVendor!["bio"],
+            businessHours: desiredVendor!["businesshours"],
+            photo: desiredVendor!["profilepic"],
+            address: desiredVendor!["address"],
+            lat: desiredVendor!["latitude"],
+            long: desiredVendor!["longitude"],
+            vType: desiredVendor!["type"],
+            id: desiredVendor!["id"],
+            uType: widget.type,
+            location: desiredVendor!["location"],
+            follow: desiredVendor!["is_following"],
+          ),
+        ));
+  }
 }
-
-// var _androidAppRetain = MethodChannel("android_app_retain");
-
-// @override
-// Widget build(BuildContext context) {
-//   return WillPopScope(
-//     onWillPop: () {
-//       if (Platform.isAndroid) {
-//         if (Navigator.of(context).canPop()) {
-//           return Future.value(true);
-//         } else {
-//           _androidAppRetain.invokeMethod("sendToBackground");
-//           return Future.value(false);
-//         }
-//       } else {
-//         return Future.value(true);
-//       }
-//     },
-//     child: Scaffold(
-//     ...
-//     ),
-//   );
-// }

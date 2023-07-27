@@ -3,7 +3,6 @@ import 'package:jingle_street/config/functions/navigator_functions.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/fields/app_fields.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
-import 'package:jingle_street/resources/widgets/others/popup.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import '../../resources/widgets/button/app_button.dart';
 import '../../resources/widgets/others/custom_appbar.dart';

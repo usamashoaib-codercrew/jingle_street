@@ -24,4 +24,10 @@ class AppUrls {
   static final String followVendor = "/api/bookmarkvendor";
   static final String getNotify = "/api/getnotifications";
   static final String is_following = "/api/is_following";
+  static final String seenNotification = "/api/seennotification";
+  static final String requestVendor = "/api/requestvendor";
+  static final String acceptRequest = "/api/acceptrequest";
+  static final String cancelRequest = "/api/cancelreq";
+  static final String tracking = "/api/tracking";
+  static final String endTracking = "/api/endtracking";
 }

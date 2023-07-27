@@ -2,6 +2,7 @@ import 'package:dialogs/dialogs/message_dialog.dart';
 import 'package:dialogs/dialogs/progress_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/connectivity/connectivity.dart';
@@ -17,6 +18,7 @@ import 'package:jingle_street/resources/widgets/fields/password_field.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
+import 'package:jingle_street/view/auth_screen/forgot_password_screen.dart';
 import 'package:jingle_street/view/auth_screen/otp_screen.dart';
 import 'package:jingle_street/view/auth_screen/signup_screen.dart';
 import 'package:jingle_street/view/home_screen/home_nav_screen.dart';
@@ -45,11 +47,31 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _passwordController = TextEditingController();
   String userEmail = '';
 
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  Future<String> getDeviceToken() async {
+    String? token = await messaging.getToken();
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    _prefs.setString("fcm_token", token!);
+    return token;
+  }
+
+  void isTokenRefresh() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    messaging.onTokenRefresh.listen((event) {
+      event.toString();
+      _prefs.setString("fcm_token", event);
+      if (kDebugMode) {
+      }
+    });
+  }
+
   @override
   void initState() {
     _loadUserEmailPassword();
     dio = AppDio(context);
     Logger.init();
+    getDeviceToken();
+    isTokenRefresh();
     super.initState();
   }
 
@@ -201,41 +223,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: 15,
                           controller: _passwordController),
                       SizeBoxHeight4(),
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //   children: [
-                      //     AppCheckBox(
-                      //       hoverColor: AppTheme.appColor,
-                      //       activeColor: Colors.white,
-                      //       borderSidewidth: 0.1,
-                      //       borderSideColor: AppTheme.appColor,
-                      //       focusColor: AppTheme.appColor,
-                      //       checkColor: AppTheme.appColor,
-                      //       value: _isChecked,
-                      //       onChanged: (val) {
-                      //         _handleRememberMe(val!);
-                      //         // saveLoginData(val!);
-                      //       },
-                      //     ),
-                      //     Expanded(
-                      //       child: AppText("Remember me",
-                      //           color: AppTheme.appColor, size: 15),
-                      //     ),
-                      //     // AppText(
-                      //     //   "Forgot password?",
-                      //     //   color: AppTheme.appColor,
-                      //     //   size: 12,
-                      //     //   onTap: () {
-                      //     //     Navigator.push(
-                      //     //         context,
-                      //     //         MaterialPageRoute(
-                      //     //           builder: (context) =>
-                      //     //               SetPasswordByPhoneNumber(),
-                      //     //         ));
-                      //     //   },
-                      //     // ),
-                      //   ],
-                      // ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: AppText(
+                          "Forgot password?",
+                          color: AppTheme.appColor,
+                          size: 12,
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      SetPasswordByPhoneNumber(),
+                                ));
+                          },
+                        ),
+                      ),
                       SizedBox(
                         height: 40,
                       ),
@@ -361,8 +364,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
-        // print("........${resData['status']}");
-
         if (resData['status']) {
           var data = responseData['data']['user'];
           var token = responseData['data']['token'];
@@ -384,7 +385,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   id: data['id'],
                 ));
               } else if (data['type'] == 0 && _isCustomer == true) {
-                replace(HomeNavScreen(type: data['type'],id: data['id'],));
+                replace(HomeNavScreen(
+                  type: data['type'],
+                  id: data['id'],
+                ));
               } else {
                 MessageDialog(
                         title: "Select",
@@ -462,7 +466,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> getAuthToken(String tokenIs) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final fcm_tokenGEt = prefs.getString('fcm_token');
-    print("klfkslkdj$fcm_tokenGEt");
     final Map<String, dynamic> headers = {
       'Authorization':
           'Bearer $tokenIs', // Replace with your actual authorization token
@@ -475,9 +478,7 @@ class _LoginScreenState extends State<LoginScreen> {
           data: {
             'fcm': fcm_tokenGEt,
           });
-      print("fksjlfks${response.data}");
       if (response.statusCode == StatusCode.OK) {
-        print("FCM TOKEN HAS BEEN ADDED SUCCESSFULLY $fcm_tokenGEt");
       }
     } catch (e, stackTrace) {
       print('Update FCM token exception: $e\nStack trace: $stackTrace');

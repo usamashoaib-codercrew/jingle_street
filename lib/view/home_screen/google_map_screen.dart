@@ -10,12 +10,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:intl/intl.dart';
+import 'package:jingle_street/Admob/ad_helper.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
 import 'package:jingle_street/config/keys/pref_keys.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/config/logger/app_logger.dart';
-import 'package:jingle_street/model/notifications.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/button/profile_button.dart';
 import 'package:jingle_street/resources/widgets/fields/search_field.dart';
@@ -26,7 +28,6 @@ import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/hashtag_search.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import 'package:jingle_street/view/menu_screen/menu_screen.dart';
-import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
 import 'package:jingle_street/view/vendor_screen/vendor_profile_screen.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,22 +49,33 @@ class Vendor {
   final id;
   final user_id;
   final following;
+  final busy;
+  final requested;
+  final reqType;
+  final customerLat;
+  final customerLong;
 
-  Vendor(
-      {required this.id,
-      required this.location,
-      required this.type,
-      required this.statusCode,
-      required this.bio,
-      required this.businessName,
-      required this.address,
-      required this.profilepic,
-      required this.businesshours,
-      required this.hashtags,
-      required this.latitude,
-      required this.longitude,
-      required this.user_id, 
-      this.following});
+  Vendor({
+    required this.id,
+    required this.location,
+    required this.type,
+    required this.statusCode,
+    required this.bio,
+    required this.businessName,
+    required this.address,
+    required this.profilepic,
+    required this.businesshours,
+    required this.hashtags,
+    required this.latitude,
+    required this.longitude,
+    required this.user_id,
+    this.following,
+    this.busy,
+    this.requested,
+    this.reqType,
+    this.customerLat,
+    this.customerLong,
+  });
 }
 
 class GoogleMapScreen extends StatefulWidget {
@@ -140,13 +152,10 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   //initilizing marker data, hashtag data and ProfilepicData
   late Stream<List<dynamic>> _futureGetpicture;
   late Future<List<dynamic>> _futureSortedNearestVendors;
+
   // late Stream<Set<Marker>> _futureGetVendor;
   Stream<List<dynamic>>? _searchHashTagFinalResult;
   Marker markers = Marker(markerId: MarkerId("1"), visible: false);
-
-  // Set<Polyline> _polylines = {};
-  // List<LatLng> polylineCoordinates = [];
-  // PolylinePoints polylinePoints = PolylinePoints();
 
 //Latitudes and longitudes of
   var storedLat;
@@ -155,42 +164,45 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   double? _getMobileVendorLocationLat;
   double? _getMobileVendorLocationlong;
   Map<String, dynamic>? gotIt;
-
-  // String? user_id;
-
   //googleAPIkey us
   //String googleAPiKey = "AIzaSyAtEldlQYJiBycTyxcSJeZAqXsBWd8PTFU";
 
-  getdatafromsharedPrefs() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    user_id = prefs.getString(PrefKey.id);
-    storedLat = prefs.getDouble(PrefKey.lat)!;
-    storedLong = prefs.getDouble(PrefKey.long)!;
-  }
+  // getdatafromsharedPrefs() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   user_id = prefs.getString(PrefKey.id);
+  //   storedLat = prefs.getDouble(PrefKey.lat);
+  //   storedLong = prefs.getDouble(PrefKey.long);
+  // }
 
   @override
   void initState() {
+    // Load the InterstitialAd
+    // _loadInterstitialAd();
+
+    // // Show the InterstitialAd after a certain delay (e.g., 5 seconds)seconds
+    // Future.delayed(Duration(seconds: 5), () {
+    //   if (_interstitialAd != null) {
+    //     _interstitialAd!.show();
+    //   }
+    // });
     dio = AppDio(context);
     Logger.init();
-    getdatafromsharedPrefs();
-    hasInternet = true;
-    // checkInternet();
-    //  getuserId();
-    _getLocationPermission();
+    //getdatafromsharedPrefs();
+    _getLocationStoredInPref();
+    _futureSortedNearestVendors = _SortedVendorsTobeShownOnDrawer();
 
+    hasInternet = true;
+    _getLocationPermission();
     _getCurrentPosition();
     _getMobileVendorLocationContinously();
-//    _getLocationStoredInPref();
-    _futureSortedNearestVendors = _SortedVendorsTobeShownOnDrawer();
     _futureGetpicture = _getVendorProfile();
-    timer = Timer.periodic(Duration(seconds: 90), (timer) {
+    timer = Timer.periodic(Duration(seconds: 40), (timer) {
       if (mounted) {
         return setState(() {
           markers;
         });
       }
     });
-
     super.initState();
   }
 
@@ -202,7 +214,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   @override
   void dispose() {
     stopTimer();
-
     super.dispose();
   }
 
@@ -212,8 +223,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final circleSize = screenHeight > screenWidth ? screenWidth : screenHeight;
-    final customHeightSize = MediaQuery.of(context).size.height *
-        MediaQuery.of(context).devicePixelRatio;
     return hasInternet
         ? Scaffold(
             key: _scaffoldKey,
@@ -254,7 +263,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                   itemCount: snapshot.data!.length,
                                   itemBuilder: (context, index) {
                                     Vendor vendor = snapshot.data![index];
-                                    print("checking ${snapshot.data!.length}");
                                     return vendor.statusCode == 1
                                         ? GestureDetector(
                                             onTap: () => Navigator.of(context)
@@ -277,7 +285,21 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                                     : 0,
                                                 bio: vendor.bio,
                                                 follow: vendor.following,
-                                            
+                                                busy: vendor.busy,
+                                                requested: vendor.requested,
+                                                reqType: vendor.reqType,
+                                                customerLat: widget.type == 0
+                                                    ? _currentPosition == null
+                                                        ? ""
+                                                        : _currentPosition!
+                                                            .latitude
+                                                    : "",
+                                                customerlong: widget.type == 0
+                                                    ? _currentPosition == null
+                                                        ? ""
+                                                        : _currentPosition!
+                                                            .longitude
+                                                    : "",
                                               ),
                                             )),
                                             child: Padding(
@@ -568,6 +590,24 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                                           uType: 1,
                                                           bio:
                                                               "bio is Not mentioned",
+                                                          customerLat: widget
+                                                                      .type ==
+                                                                  0
+                                                              ? _currentPosition ==
+                                                                      null
+                                                                  ? ""
+                                                                  : _currentPosition!
+                                                                      .latitude
+                                                              : "",
+                                                          customerlong: widget
+                                                                      .type ==
+                                                                  0
+                                                              ? _currentPosition ==
+                                                                      null
+                                                                  ? ""
+                                                                  : _currentPosition!
+                                                                      .longitude
+                                                              : "",
                                                         );
                                                       }),
                                                     );
@@ -606,6 +646,28 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                                                   : 0,
                                                           bio: data["bio"] ??
                                                               "bio is Not mentioned",
+                                                          busy: data["busy"],
+                                                          requested:
+                                                              data["requested"],
+                                                          reqType: widget.type,
+                                                          customerLat: widget
+                                                                      .type ==
+                                                                  0
+                                                              ? _currentPosition ==
+                                                                      null
+                                                                  ? ""
+                                                                  : _currentPosition!
+                                                                      .latitude
+                                                              : "",
+                                                          customerlong: widget
+                                                                      .type ==
+                                                                  0
+                                                              ? _currentPosition ==
+                                                                      null
+                                                                  ? ""
+                                                                  : _currentPosition!
+                                                                      .longitude
+                                                              : "",
                                                         );
                                                       }),
                                                     );
@@ -642,7 +704,12 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                       );
                                     },
                                   )
-                                : SizedBox(),
+                                : StreamBuilder(
+                                    stream: _futureGetpicture,
+                                    builder: (context, snapshot) {
+                                      return SizedBox();
+                                    },
+                                  ),
                           ],
                         ),
                         Stack(
@@ -667,6 +734,16 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                               type: widget.type,
                               hashtagVisible: _hashtagVisible,
                               stream: _searchHashTagFinalResult,
+                              customerLat: widget.type == 0
+                                  ? _currentPosition == null
+                                      ? ""
+                                      : _currentPosition!.latitude
+                                  : "",
+                              customerLong: widget.type == 0
+                                  ? _currentPosition == null
+                                      ? ""
+                                      : _currentPosition!.longitude
+                                  : "",
                             ),
                           ],
                         )
@@ -705,7 +782,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
               ],
             ),
             floatingActionButton: Padding(
-              padding: const EdgeInsets.only(bottom: 80.0),
+              padding: EdgeInsets.only(bottom: 95.0),
               child: FloatingActionButton(
                 backgroundColor: AppTheme.appColor,
                 child: Icon(Icons.my_location),
@@ -774,23 +851,20 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
-        print("........${resData['status']}");
-
         if (resData['status'] == true) {
           var data = responseData['data']['vendorprofile'] ?? [];
-
           setState(() {
             _vendorType = data["type"];
           });
-          print("asdasd${_vendorType}");
         }
       }
     } catch (e, s) {
       print(e);
+
       print(s);
     }
     if (_vendorType == 1) {
-      timer = Timer.periodic(Duration(seconds: 60), (Timer t) async {
+      timer = Timer.periodic(Duration(seconds: 30), (Timer t) async {
         return Geolocator.getCurrentPosition().then((event) async {
           _getMobileVendorLocationLat = event.latitude + 0.0;
           _getMobileVendorLocationlong = event.longitude + 0.0;
@@ -843,19 +917,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   _getCurrentPosition() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-//       if(prefs.getDouble(PrefKey.lat) != 0.0)
-//         {
-//           setState(() {
-// //            _currentPosition = finalLatlang;
-//             storedLat = prefs.getDouble(PrefKey.lat);
-//             storedLong = prefs.getDouble(PrefKey.lat);
-//             user_id = prefs.getString(PrefKey.id);
-//             check = true;
-//             _futureGetVendor = _getVendor();
-//
-//           });
-//         }
-
       Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
           .then((value) {
         prefs.setDouble(PrefKey.lat, value.latitude + 0.0);
@@ -863,16 +924,8 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
         _currentPosition = value;
       });
 
-      // var uid = "";
-      // Prefs.getPrefs().then((prefs) {
-      //   prefs.setDouble(PrefKey.lat, finalLatlang!.latitude + 0.0);
-      //   prefs.setDouble(PrefKey.long, finalLatlang!.longitude + 0.0);
-      //   uid = prefs.getString(PrefKey.id)!;
-      // });
-
       setState(() {
         check = true;
-        _getVendor();
       });
     } catch (e) {
       showDialog(
@@ -894,16 +947,16 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   }
 
 //this function gets stored lat long in shared preferences. which was saved in _getCurrentPosition.
-//   _getLocationStoredInPref() async {
-//     SharedPreferences prefs = await SharedPreferences.getInstance();
-//     double? latitude = prefs.getDouble(PrefKey.lat);
-//     double? longitude = prefs.getDouble(PrefKey.long);
-//     setState(() {
-//       storedLat = latitude;
-//       storedLong = longitude;
-//       user_id = prefs.getString(PrefKey.id);
-//     });
-//   }
+  _getLocationStoredInPref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    double? latitude = prefs.getDouble(PrefKey.lat);
+    double? longitude = prefs.getDouble(PrefKey.long);
+    setState(() {
+      storedLat = latitude;
+      storedLong = longitude;
+      user_id = prefs.getString(PrefKey.id);
+    });
+  }
 
 //method to create _searchHashTags
   Stream<List<dynamic>> _searchHasTags({String? searchValue}) async* {
@@ -927,9 +980,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 
 //this function sorts data of Vendor Nearst along with the current position of the person. and shows Nearest Vendors List Details on Drawer()
   Future<List<dynamic>> _SortedVendorsTobeShownOnDrawer() async {
-    Geolocator.getCurrentPosition();
-    print("this API has been hit");
-
     var response;
     List<dynamic> sortedVendors = [];
     try {
@@ -956,7 +1006,10 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
               latitude: vendorData["latitude"] + 0.0,
               longitude: vendorData["longitude"] + 0.0,
               statusCode: vendorData["status"],
-              following: vendorData["is_following"]
+              following: vendorData["is_following"],
+              busy: vendorData["busy"],
+              requested: vendorData["requested"],
+              reqType: widget.type,
             )
           ]);
 
@@ -976,14 +1029,11 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
             );
             return distanceToA.compareTo(distanceToB);
           });
-          // } else {
-          //   Center(
-          //     child: CircularProgressIndicator(),
-          //   );
-          // }
         }
       }
-    } catch (e, s) {}
+    } catch (e, s) {
+      print("dyufgewbfhegf${e}");
+    }
     ;
     return sortedVendors;
   }
@@ -1069,6 +1119,19 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                       "business hours Not Mentioned",
                                   bio: marker["bio"] ?? "Bio is not mentioned",
                                   follow: marker['is_following'],
+                                  busy: marker["busy"],
+                                  requested: marker["requested"],
+                                  reqType: widget.type,
+                                  customerLat: widget.type == 0
+                                      ? _currentPosition == null
+                                          ? ""
+                                          : _currentPosition!.latitude
+                                      : "",
+                                  customerlong: widget.type == 0
+                                      ? _currentPosition == null
+                                          ? ""
+                                          : _currentPosition!.longitude
+                                      : "",
                                 ),
                               ));
                             },
@@ -1100,6 +1163,17 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                       "business hours not mentioned",
                                   bio: marker["bio"] ?? "Bio is not mentioned",
                                   follow: marker['is_following'],
+                                  reqType: widget.type,
+                                  customerLat: widget.type == 0
+                                      ? _currentPosition == null
+                                          ? ""
+                                          : _currentPosition!.latitude
+                                      : "",
+                                  customerlong: widget.type == 0
+                                      ? _currentPosition == null
+                                          ? ""
+                                          : _currentPosition!.longitude
+                                      : "",
                                 ),
                               ));
                             },
@@ -1107,7 +1181,6 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                             businessName: marker["businessname"],
                             businessHours: marker["businesshours"] ??
                                 "Business Hours Not mentioned",
-                                
                             address: marker["address"],
                             hashTags: marker["hashtags"],
                             imageUrl: imageData),
@@ -1138,44 +1211,10 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
         print(e);
         print(s);
       }
-      // widget.lat != null &&widget.long != null && _destinationMarker.clear !=true? _destinationMarker.add(Marker(
-      //    markerId: MarkerId("destination"),
-      //    position: LatLng(widget.lat!, widget.long!),
-      //    icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      //  )):_destinationMarker;
-      //  _polyLinesRoute();
-      //  // Add the destination marker to the set of markers
-      //  _list.addAll(_destinationMarker);
-
       yield _list;
     }
   }
 
-//   _polyLinesRoute()async{
-//     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-//       googleAPiKey,
-//       PointLatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-//       PointLatLng(widget.lat!, widget.long!),
-//       travelMode: TravelMode.driving,);
-//     if (result.points.isNotEmpty) {
-//       result.points.forEach((PointLatLng point) {
-//         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-//       });
-//     } else if(result.points == null){
-//       polylineCoordinates == null;
-// }
-//
-//     Polyline polyline = Polyline(
-//       polylineId: PolylineId('route'),
-//       color: Colors.blue,
-//       points: polylineCoordinates,
-//
-//     );
-//     _polylines.add(polyline);
-//
-//   }
-
-  //this method gets Vendor profile
   Stream<List<dynamic>> _getVendorProfile() async* {
     var response;
     List<dynamic> _profile = [];
@@ -1191,7 +1230,13 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
         var resData = responseData;
         if (resData['status'] == true) {
           var data = responseData['data']['vendorprofile'];
+
+          int notifyCount = resData["data"]["user"]["noti_count"];
           _profile.add(data);
+          Prefs.getPrefs().then((value) {
+            print("nnfnrefjrnfnnjgjb$notifyCount");
+            value.setInt(PrefKey.nottifyCount, notifyCount);
+          });
         }
       }
     } catch (e, s) {

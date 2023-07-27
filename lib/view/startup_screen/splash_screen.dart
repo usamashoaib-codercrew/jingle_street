@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:jingle_street/config/keys/pref_keys.dart';
 import 'package:jingle_street/resources/res/app_assets.dart';
@@ -6,11 +5,10 @@ import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/view/auth_screen/login_screen.dart';
 import 'package:jingle_street/view/auth_screen/otp_screen.dart';
 import 'package:jingle_street/view/home_screen/home_nav_screen.dart';
+import 'package:jingle_street/view/home_screen/track_system/track_vendor.dart';
 import 'package:jingle_street/view/startup_screen/get_started_screen.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:sizer/sizer.dart';
-
-// import '../../app_properties.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,6 +22,8 @@ class _SplashScreenState extends State<SplashScreen> {
   String token = '';
   String? name;
   String? id;
+  late int userType;
+  late String req_id;
 
   int? verified;
   String? phone;
@@ -147,23 +147,34 @@ class _SplashScreenState extends State<SplashScreen> {
 
       verified = prefs.getInt(PrefKey.verified) ?? 0;
       type = prefs.getInt(PrefKey.type) ?? 0;
+      req_id = prefs.getString('req_id') ?? "";
+      userType = prefs.getInt('setUserType') ?? 0;
     });
   }
 
   void _navigatorFunction() async {
     await Future.delayed(Duration(seconds: 3), () {});
-    if (token.isNotEmpty && verified == 1) {
-      replace(HomeNavScreen(
-        type: type,
-        name: name,
-        id: id,
-      ));
+     if (token.isNotEmpty && verified == 1) {
+       if(req_id !=null && userType != 0){
+         replace(TrackUser(requestId: req_id, type: userType,));
+       } else {
+         replace(HomeNavScreen(
+           type: type,
+           name: name,
+           id: id,
+           index: 0,
+         ),
+         );
+       }
     } else if (token.isNotEmpty && verified == 0 && phone != null) {
       replace(OtpScreen(phoneNumber: "${phone}"));
     } else if (verified == 0 && phone != null && phone!.isNotEmpty) {
       replace(LoginScreen());
     } else {
-      replace(GetStartedScreen());
+       if(req_id != null && userType != 0){
+         replace(TrackUser(requestId: req_id, type: userType,));
+       }else {
+      replace(GetStartedScreen());}
     }
   }
 }

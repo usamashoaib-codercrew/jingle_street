@@ -54,5 +54,11 @@
             android:value="2" />
        <meta-data android:name="com.google.android.geo.API_KEY"
            android:value="AIzaSyAtEldlQYJiBycTyxcSJeZAqXsBWd8PTFU"/>
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-8818146645314379~1306317272"/>
+        <meta-data
+            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
+            android:value="true" />
     </application>
 </manifest>

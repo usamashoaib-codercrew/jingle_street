@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jingle_street/config/functions/navigator_functions.dart';
-import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
 import 'package:jingle_street/view/buy_screen/add_to_card_screen.dart';
 import 'package:jingle_street/view/menu_screen/detail_edit_screen.dart';
-import 'package:jingle_street/view/vendor_screen/add_items_screen.dart';
-import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
 
 class BurgerBuilder extends StatefulWidget {
@@ -24,7 +20,6 @@ class BurgerBuilder extends StatefulWidget {
 class _BurgerBuilderState extends State<BurgerBuilder> {
   @override
   Widget build(BuildContext context) {
-    print("utype${widget.uType}...............");
     Size size = MediaQuery.of(context).size;
     return Container(
       height: 140,

@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:jingle_street/config/app_urls.dart';
 import 'package:jingle_street/config/connectivity/connectivity.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
@@ -205,7 +204,6 @@ class _OtpScreenState extends State<OtpScreen> {
                         String smsCode = _smsCodeController.text.trim();
                         if (smsCode.isNotEmpty) {
                           _signInWithPhoneNumber(smsCode);
-                          // print("----> gettt ${smsCode}");
                         }
                       },
                     ),
@@ -282,9 +280,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
     try {
       response = await dio.post(path: AppUrls.verifySignUp);
-      // print("checkingg_response $response");
       var responseData = response.data;
-      // print("checkingg_responseData $responseData");
       if (loading) {
         loading = false;
         progressDialog.dismiss();
@@ -302,7 +298,6 @@ class _OtpScreenState extends State<OtpScreen> {
             prefs.setInt(PrefKey.type, data['type']);
             prefs.setInt(PrefKey.verified, data['verified']);
             var token = prefs.getString('fcm_token');
-            print("lkajsdljflskdjl$token");
             getAuthToken(token!);
           }).then((value) {
             replace(HomeNavScreen(type: data['type'],id: data['id'],));
@@ -491,7 +486,6 @@ class _OtpScreenState extends State<OtpScreen> {
   void _handleControllers(List<TextEditingController?> controllers) {
     final code = controllers.map((c) => c?.text).join('');
     _smsCodeController.text = code;
-    print("SMS Code: $code");
   }
 
   clearUserData() async {
@@ -501,11 +495,9 @@ class _OtpScreenState extends State<OtpScreen> {
   Future<void> getAuthToken(String tokenIs) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final fcm_tokenGEt = prefs.getString('fcm_token');
-    print("klfkslkdj$fcm_tokenGEt");
     final Map<String, dynamic> headers = {
       'Authorization':
           'Bearer $tokenIs', // Replace with your actual authorization token
-      // 'Content-Type': 'application/json',
     };
     try {
       final response = await dio.post(
@@ -514,15 +506,11 @@ class _OtpScreenState extends State<OtpScreen> {
           data: {
             'fcm': fcm_tokenGEt,
           });
-      print("fksjlfks${response.data}");
       if (response.statusCode == StatusCode.OK) {
         print("FCM TOKEN HAS BEEN ADDED SUCCESSFULLY $fcm_tokenGEt");
       }
     } catch (e, stackTrace) {
       print('Update FCM token exception: $e\nStack trace: $stackTrace');
-      // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      //   content: Text('FCM Token not updated.'),
-      // ));
     }
   }
 }

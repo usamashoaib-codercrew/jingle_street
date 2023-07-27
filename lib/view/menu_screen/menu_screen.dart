@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:jingle_street/config/app_urls.dart';
-import 'package:jingle_street/config/connectivity/connectivity.dart';
 import 'package:jingle_street/config/dio/app_dio.dart';
 import 'package:jingle_street/config/functions/navigator_functions.dart';
-import 'package:jingle_street/config/functions/provider.dart';
 import 'package:jingle_street/config/keys/response_code.dart';
 import 'package:jingle_street/config/logger/app_logger.dart';
+import 'package:jingle_street/providers/Item_referesh_provider.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
 import 'package:jingle_street/resources/widgets/others/sized_boxes.dart';
@@ -24,6 +24,8 @@ import 'package:jingle_street/view/menu_screen/vendor_review_screen.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
+import '../../Admob/ad_helper.dart';
 
 List isRated = List.generate(36, (index) => 1, growable: true);
 
@@ -65,21 +67,32 @@ class VandorScreen extends StatefulWidget {
   final uType;
   final location;
   final follow;
+  final busy;
+  final requested;
+  final reqType;
+  final customerLat;
+  final customerlong;
 
-  VandorScreen(
-      {super.key,
-        this.businessName,
-        this.photo,
-        this.address,
-        this.lat,
-        this.long,
-        this.vType,
-        this.id,
-        this.uType,
-        this.location,
-        this.businessHours,
-        this.bio,
-        this.follow});
+  VandorScreen({
+    super.key,
+    this.businessName,
+    this.photo,
+    this.address,
+    this.lat,
+    this.long,
+    this.vType,
+    this.id,
+    this.uType,
+    this.location,
+    this.businessHours,
+    this.bio,
+    this.follow,
+    this.busy,
+    this.requested,
+    this.reqType,
+    this.customerLat,
+    this.customerlong,
+  });
 
   @override
   State<VandorScreen> createState() => _VandorScreenState();
@@ -91,27 +104,56 @@ class _VandorScreenState extends State<VandorScreen> {
   AppLogger Logger = AppLogger();
   late AppDio dio;
   bool loading = false;
+  bool sendRequest = true;
+  List<dynamic> vendorData = [];
+  var desiredVendor;
 
   // var finalData;
   late Stream<List<dynamic>> _futureGetItems;
   bool isFollowing = false;
+  BannerAd? _bannerAd;
+  void _loadBannerAd() {
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.largeBanner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+
   @override
   void dispose() {
+    _bannerAd?.dispose();
     super.dispose();
   }
+
   @override
   void initState() {
     dio = AppDio(context);
     Logger.init();
+    _loadBannerAd();
     checkIfUserIsFollowing();
     _futureGetItems = getVendorItems();
+    getVendor();
     super.initState();
-
   }
-  checkIfUserIsFollowing()async {
+
+  checkIfUserIsFollowing() async {
     var response;
-    try{
-      response = await dio.get(path: AppUrls.is_following,queryParameters: {"vendor_id" : widget.id});
+    try {
+      response = await dio.get(
+          path: AppUrls.is_following,
+          queryParameters: {"vendor_id": widget.id});
       var responseData = response.data;
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
@@ -123,18 +165,16 @@ class _VandorScreenState extends State<VandorScreen> {
           });
         }
       }
-    }
-    catch(e){
+    } catch (e) {
       print("error${e}");
     }
-
   }
+
   List<bool> isSelectedList =
-  List.generate(MenuText.length, (index) => index == 0);
+      List.generate(MenuText.length, (index) => index == 0);
 
   @override
   Widget build(BuildContext context) {
-    print("vtype..${widget.vType}");
     bool myBoolean = Provider.of<BoolProvider>(context).myBoolean;
     var size = MediaQuery.of(context).size;
 
@@ -147,24 +187,29 @@ class _VandorScreenState extends State<VandorScreen> {
       backgroundColor: AppTheme.appColor,
       appBar: AppBar(
           actions: [
-            widget.uType == 0 ? isFollowing? InkWell(
-                onTap: () {
-                  favouriteVendor(context);
-                },
-                child: Icon(
-                  Icons.favorite_rounded,
-                  color: AppTheme.appColor,
-                )):
-            InkWell(
-              onTap: () {
-                favouriteVendor(context);
-              },
-              child: Icon(
-                Icons.favorite_border_outlined,
-                color: AppTheme.appColor,
-              ),
-            ):SizedBox(),
-            SizedBox(width: 30,)
+            widget.uType == 0
+                ? isFollowing
+                    ? InkWell(
+                        onTap: () {
+                          favouriteVendor(context);
+                        },
+                        child: Icon(
+                          Icons.favorite_rounded,
+                          color: AppTheme.appColor,
+                        ))
+                    : InkWell(
+                        onTap: () {
+                          favouriteVendor(context);
+                        },
+                        child: Icon(
+                          Icons.favorite_border_outlined,
+                          color: AppTheme.appColor,
+                        ),
+                      )
+                : SizedBox(),
+            SizedBox(
+              width: 30,
+            )
           ],
           centerTitle: true,
           backgroundColor: AppTheme.whiteColor,
@@ -231,72 +276,73 @@ class _VandorScreenState extends State<VandorScreen> {
                 children: [
                   widget.vType == null
                       ? SizedBox(
-                    height: 20,
-                  )
+                          height: 20,
+                        )
                       : widget.vType == 0
-                      ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AppText(
-                        "Stationary Vendor",
-                        color: Colors.white,
-                        size: 16,
-                        bold: FontWeight.bold,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          push(VendorReviewScreen(
-                            profileImage: widget.photo,
-                            address: widget.address,
-                            vType: widget.vType,
-                            uType: widget.uType,
-                            lat: widget.lat,
-                            lon: widget.long,
-                            businessName: widget.businessName,
-                            location: widget.location,
-                            vId: widget.id,
-                          ));
-                        },
-                        child: AppText(
-                          "Reviews & info",
-                          color: Colors.white,
-                          size: 16,
-                          bold: FontWeight.bold,
-                        ),
-                      )
-                    ],
-                  )
-                      : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AppText(
-                        "Mobile Vendor",
-                        color: Colors.white,
-                        size: 16,
-                        bold: FontWeight.bold,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          push(VendorReviewScreen(
-                            profileImage: widget.photo,
-                            address: widget.address,
-                            vType: widget.vType,
-                            uType: widget.uType,
-                            lat: widget.lat,
-                            lon: widget.long,
-                            businessName: widget.businessName,
-                            location: widget.location,
-                          ));
-                        },
-                        child: AppText(
-                          "Reviews & info",
-                          color: Colors.white,
-                          size: 16,
-                          bold: FontWeight.bold,
-                        ),
-                      )
-                    ],
-                  ),
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                AppText(
+                                  "Stationary Vendor",
+                                  color: Colors.white,
+                                  size: 16,
+                                  bold: FontWeight.bold,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    push(VendorReviewScreen(
+                                      profileImage: widget.photo,
+                                      address: widget.address,
+                                      vType: widget.vType,
+                                      uType: widget.uType,
+                                      lat: widget.lat,
+                                      lon: widget.long,
+                                      businessName: widget.businessName,
+                                      location: widget.location,
+                                      vId: widget.id,
+                                    ));
+                                  },
+                                  child: AppText(
+                                    "Reviews & info",
+                                    color: Colors.white,
+                                    size: 16,
+                                    bold: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                AppText(
+                                  "Mobile Vendor",
+                                  color: Colors.white,
+                                  size: 16,
+                                  bold: FontWeight.bold,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    push(VendorReviewScreen(
+                                      profileImage: widget.photo,
+                                      address: widget.address,
+                                      vType: widget.vType,
+                                      uType: widget.uType,
+                                      lat: widget.lat,
+                                      lon: widget.long,
+                                      businessName: widget.businessName,
+                                      location: widget.location,
+                                      vId: widget.id,
+                                    ));
+                                  },
+                                  child: AppText(
+                                    "Reviews & info",
+                                    color: Colors.white,
+                                    size: 16,
+                                    bold: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            ),
                   SizeBoxHeight5(),
                   Container(
                     decoration: BoxDecoration(
@@ -347,45 +393,134 @@ class _VandorScreenState extends State<VandorScreen> {
                           SizeBoxHeight6(),
                           widget.vType == 1
                               ? InkWell(
-                            onTap: () => GetDirectionToVendor(
-                                lat: widget.lat,
-                                long: widget.long,
-                                businessname: widget.businessName),
-                            child: Container(
-                              margin: EdgeInsets.only(
-                                left: 5,
-                              ),
-                              height: size.height * 0.1,
-                              width: size.width * 0.5,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10)),
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          "assets/images/map.png"),
-                                      fit: BoxFit.fill)),
-                            ),
-                          )
+                                  onTap: () => GetDirectionToVendor(
+                                      lat: widget.lat,
+                                      long: widget.long,
+                                      businessname: widget.businessName),
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      left: 5,
+                                    ),
+                                    height: size.height * 0.1,
+                                    width: size.width * 0.67,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)),
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                "assets/images/map.png"),
+                                            fit: BoxFit.fill)),
+                                  ),
+                                )
                               : InkWell(
-                            onTap: () => GetDirectionToVendor(
-                                lat: widget.lat,
-                                long: widget.long,
-                                businessname: widget.businessName),
-                            child: Container(
-                              margin: EdgeInsets.only(
-                                left: 5,
-                              ),
-                              height: size.height * 0.1,
-                              width: size.width * 0.5,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10)),
-                                  image: DecorationImage(
-                                      image:
-                                      NetworkImage(widget.location),
-                                      fit: BoxFit.fill)),
-                            ),
-                          ),
+                                  onTap: () => GetDirectionToVendor(
+                                      lat: widget.lat,
+                                      long: widget.long,
+                                      businessname: widget.businessName),
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      left: 5,
+                                    ),
+                                    height: size.height * 0.1,
+                                    width: size.width * 0.67,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)),
+                                        image: DecorationImage(
+                                            image:
+                                                NetworkImage(widget.location),
+                                            fit: BoxFit.fill)),
+                                  ),
+                                ),
+                          SizeBoxHeight15(),
+
+                          widget.reqType == 1
+                              ? SizedBox()
+                              : widget.vType == 1
+                                  ? Container(
+                                      margin: EdgeInsets.only(
+                                        left: 5,
+                                      ),
+                                      padding: EdgeInsets.all(10),
+                                      height: size.height * 0.1,
+                                      width: size.width * 0.67,
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.appColor,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          AppText(
+                                            "Invite Vendors to \nyour Location!",
+                                            size: 17,
+                                            color: AppTheme.whiteColor,
+                                            bold: FontWeight.w700,
+                                          ),
+                                          Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: InkWell(
+                                              onTap: () {
+                                                if (desiredVendor[
+                                                        'requestId'] ==
+                                                    null) {
+                                                  if (desiredVendor[
+                                                              'requested'] ==
+                                                          false &&
+                                                      desiredVendor['busy'] ==
+                                                          0) {
+                                                    widget.customerlong == "" ||
+                                                            widget.customerLat ==
+                                                                ""
+                                                        ? ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                                const SnackBar(
+                                                            content: Text(
+                                                                'PLease enable your location and reload your page'),
+                                                          ))
+                                                        : requestVendor();
+                                                  } else if (desiredVendor[
+                                                          'busy'] ==
+                                                      1) {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                            const SnackBar(
+                                                      content: Text(
+                                                          'Vendor is busy at the moment!'),
+                                                    ));
+                                                  }
+                                                } else {
+                                                  cancelRequest();
+                                                }
+                                              },
+                                              child: Container(
+                                                width: 100,
+                                                height: 36,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                  color: AppTheme.whiteColor,
+                                                ),
+                                                child: Center(
+                                                  child: desiredVendor == null
+                                                      ? AppText(
+                                                          "Loading...",
+                                                          color:
+                                                              AppTheme.appColor,
+                                                          size: 14,
+                                                          bold: FontWeight.w400,
+                                                        )
+                                                      : inviteVendorText(),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : SizedBox(),
                           SizedBox(height: 15),
                           AppText("Choose the",
                               size: 16, color: AppTheme.appColor),
@@ -410,8 +545,8 @@ class _VandorScreenState extends State<VandorScreen> {
                                       onTap: () {
                                         setState(() {
                                           for (int i = 0;
-                                          i < isSelectedList.length;
-                                          i++) {
+                                              i < isSelectedList.length;
+                                              i++) {
                                             isSelectedList[i] = i == index;
                                           }
                                         });
@@ -423,7 +558,7 @@ class _VandorScreenState extends State<VandorScreen> {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                          BorderRadius.circular(20),
+                                              BorderRadius.circular(20),
                                           border: Border.all(
                                               color: isSelectedList[index]
                                                   ? AppTheme.appColor
@@ -435,15 +570,15 @@ class _VandorScreenState extends State<VandorScreen> {
                                         width: 110,
                                         child: Column(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                           mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                              MainAxisAlignment.center,
                                           children: [
                                             Image(
                                               height: 18,
                                               width: 44,
                                               image:
-                                              AssetImage(MenuImages[index]),
+                                                  AssetImage(MenuImages[index]),
                                             ),
                                             SizeBoxHeight3(),
                                             AppText(
@@ -495,7 +630,7 @@ class _VandorScreenState extends State<VandorScreen> {
                             children: [
                               Padding(
                                 padding:
-                                const EdgeInsets.only(left: 5.0, top: 16),
+                                    const EdgeInsets.only(left: 5.0, top: 16),
                                 child: AppText("Free Box Of Fries",
                                     size: 17,
                                     bold: FontWeight.bold,
@@ -732,26 +867,57 @@ class _VandorScreenState extends State<VandorScreen> {
                                       itemData: data["product"],
                                       uType: widget.uType,
                                       vType: widget.vType),
+                                  // Container(height: 100,width: 200,color: Colors.amber,)
                                 ],
                               ),
+                            SizedBox(height: 30),
+                            if (_bannerAd != null)
+                              Align(
+                                alignment: Alignment.topCenter,
+                                child: Container(
+                                  width: _bannerAd!.size.width.toDouble(),
+                                  height: _bannerAd!.size.height.toDouble(),
+                                  child: AdWidget(ad: _bannerAd!),
+                                ),
+                              ),
+                            SizedBox(
+                              height: 10,
+                            )
                           ],
                         );
                       } else {
-                        return Container(
-                          height: 300,
-                          child: Center(
-                            child: Text(
-                              'No data available.',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
+                        return Column(
+                          children: [
+                            Container(
+                              height: 300,
+                              child: Center(
+                                child: Text(
+                                  'No data available.',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            SizedBox(height: 30),
+                            if (_bannerAd != null)
+                              Align(
+                                alignment: Alignment.topCenter,
+                                child: Container(
+                                  width: _bannerAd!.size.width.toDouble(),
+                                  height: _bannerAd!.size.height.toDouble(),
+                                  child: AdWidget(ad: _bannerAd!),
+                                ),
+                              ),
+                            SizedBox(
+                              height: 10,
+                            )
+                          ],
                         );
                       }
                     },
-                  )
+                  ),
                 ],
               ),
             )
@@ -783,7 +949,7 @@ class _VandorScreenState extends State<VandorScreen> {
       print("_____$s");
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content:
-        Text('Failed to load data. Please check your internet connection.'),
+            Text('Failed to load data. Please check your internet connection.'),
       ));
     }
     yield _profile;
@@ -791,8 +957,8 @@ class _VandorScreenState extends State<VandorScreen> {
 
   GetDirectionToVendor(
       {required double lat,
-        required double long,
-        required String businessname}) async {
+      required double long,
+      required String businessname}) async {
     try {
       if (Platform.isIOS) {
         final url = 'https://maps.google.com/?q=$lat,$long';
@@ -822,6 +988,33 @@ class _VandorScreenState extends State<VandorScreen> {
     }
   }
 
+  Widget inviteVendorText() {
+    if (desiredVendor['requestId'] == null) {
+      if (desiredVendor['requested'] == false && desiredVendor['busy'] == 0) {
+        return AppText(
+          "Invite Request",
+          size: 12,
+          color: AppTheme.appColor,
+          bold: FontWeight.bold,
+        );
+      } else if (desiredVendor['busy'] == 1) {
+        return AppText(
+          "Busy",
+          size: 12,
+          color: AppTheme.appColor,
+          bold: FontWeight.bold,
+        );
+      }
+    } else {
+      return AppText(
+        "Cancel Request",
+        size: 12,
+        color: AppTheme.appColor,
+        bold: FontWeight.bold,
+      );
+    }
+    return Center(child: CircularProgressIndicator());
+  }
 
   favouriteVendor(context) async {
     ProgressDialog progressDialog = ProgressDialog(
@@ -847,13 +1040,10 @@ class _VandorScreenState extends State<VandorScreen> {
       if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
 
-        print("resData$resData");
         setState(() {
-          if(resData["message"] == "Unliked")
-          {
+          if (resData["message"] == "Unliked") {
             isFollowing = false;
-          }
-          else{
+          } else {
             isFollowing = true;
           }
         });
@@ -872,5 +1062,186 @@ class _VandorScreenState extends State<VandorScreen> {
     }
   }
 
+  _StatusCodeUpate() async {
+    var response;
+    try {
+      response = await dio.post(
+          path: AppUrls.updateStatusCode,
+          data: {"status": sendRequest == true ? 1 : 0});
+    } catch (e, s) {
+      print(e);
+      print(s);
+    }
+  }
 
+  //request vendor api
+  requestVendor() async {
+    ProgressDialog progressDialog = ProgressDialog(
+      context: context,
+      backgroundColor: Colors.white,
+      textColor: AppTheme.appColor,
+    );
+    progressDialog.show();
+    loading = true;
+    var response;
+    try {
+      response = await dio.post(path: AppUrls.requestVendor, data: {
+        "longitude": widget.customerlong,
+        "latitude": widget.customerLat,
+        "address": widget.address,
+        "vendor_id": widget.id,
+      });
+      var responseData = response.data;
+      if (response.statusCode == StatusCode.BAD_REQUEST) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Server Down. Please try again.')));
+      } else if (response.statusCode == StatusCode.OK) {
+        var resData = responseData;
+        if (resData['status'] == true) {
+          await getVendor();
+          if (loading) {
+            loading = false;
+            progressDialog.dismiss();
+          }
+          showReviewDialog(context, 'Request Sent Successfully!');
+
+          setState(() {});
+        } else if(resData["status"] == false){
+          await getVendor();
+          if (loading) {
+            loading = false;
+            progressDialog.dismiss();
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('You already requested')));
+          setState(() {});
+        }
+      }
+    } catch (e) {
+      print("Request Vendor Exception $e");
+    }
+  }
+
+  //request cancel api
+  cancelRequest() async {
+    ProgressDialog progressDialog = ProgressDialog(
+      context: context,
+      backgroundColor: Colors.white,
+      textColor: AppTheme.appColor,
+    );
+    progressDialog.show();
+    loading = true;
+    var response;
+
+    try {
+      response = await dio.post(path: AppUrls.cancelRequest, data: {
+        // "id": "64b51d1fcd37a098c18d8a5f" //here add req_id
+        "id": desiredVendor['requestId'] //here add req_id
+      });
+      var responseData = response.data;
+      if (response.statusCode == StatusCode.BAD_REQUEST) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Server Down. Please try again.')));
+      } else if (response.statusCode == StatusCode.OK) {
+        var resData = responseData;
+        if (resData['status'] == true) {
+          await getVendor();
+          if (loading) {
+            loading = false;
+            progressDialog.dismiss();
+          }
+
+          setState(() {});
+        }
+      }
+    } catch (e) {
+      print("Cancel Request Exception $e");
+    }
+  }
+
+  getVendor() async {
+    var response;
+
+    try {
+      response = await dio.get(
+        path: AppUrls.getVendor,
+      );
+      var responseData = response.data;
+      if (response.statusCode == StatusCode.BAD_REQUEST) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Server Down')));
+      } else if (response.statusCode == StatusCode.OK) {
+        var resData = responseData;
+        if (resData['status'] == true) {
+          vendorData = responseData['data']['vendors'];
+          for (var vendor in vendorData) {
+            if (vendor["id"] == widget.id) {
+              desiredVendor = vendor;
+              if (mounted) {
+                setState(() {});
+              }
+            }
+          }
+        }
+      }
+    } catch (e, s) {
+      print("_____$e");
+      print("_____$s");
+    }
+  }
+
+  void showReviewDialog(BuildContext context, String dialogueText) {
+    showDialog(
+      context: context,
+      barrierDismissible:
+          false, // Prevents dismissing the dialog by tapping outside or pressing back button
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.appColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration:
+                    Duration(seconds: 1), // Customize the animation duration
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.whiteColor,
+                ),
+                child: Icon(
+                  Icons.check,
+                  color: AppTheme.appColor,
+                  size: 40,
+                ),
+              ),
+              SizedBox(height: 16),
+              AppText(
+                dialogueText,
+                color: AppTheme.whiteColor,
+                size: 18,
+                bold: FontWeight.bold,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: AppText(
+                "OK",
+                color: AppTheme.whiteColor,
+                size: 16,
+                bold: FontWeight.bold,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

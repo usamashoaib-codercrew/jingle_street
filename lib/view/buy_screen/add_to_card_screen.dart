@@ -2,15 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jingle_street/providers/cart_counter.dart';
 import 'package:jingle_street/resources/res/app_theme.dart';
-import 'package:jingle_street/resources/widgets/button/app_button.dart';
 import 'package:jingle_street/resources/widgets/others/app_text.dart';
-import 'package:jingle_street/resources/widgets/others/custom_appbar.dart';
-import 'package:jingle_street/view/buy_screen/cart_confirm_order_screen.dart';
 import 'package:jingle_street/view/menu_screen/video_player_screen.dart';
 import 'package:page_view_indicators/circle_page_indicator.dart';
-import 'package:provider/provider.dart';
 import 'package:req_fun/req_fun.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,23 +33,7 @@ class AddToCardScreen extends StatefulWidget {
 class _AddToCardScreenState extends State<AddToCardScreen> {
   final _pageIndexNotifier = ValueNotifier<int>(0);
 
-  // final List<dynamic> extraListAdd = [];
-  // final List<String> addExtraItems = [
-  //   'Extra Cheese',
-  //   'Extra Sauce',
-  //   'Extra Ketchup',
-  //   'Extra Salad',
-  // ];
-  // bool _isFilled = false;
-  // bool _isFilled1 = false;
-  // bool _isFilled2 = false;
-  // bool _isFilled3 = false;
-
-  bool _alreadyAddedItems = false;
-
   List<Map<String, dynamic>> itemsList = [];
-  // List<Map<String, dynamic>> itemsMergedList = [];
-
   int counterValue = 1;
 
   Future<void> addToCartItems() async {
@@ -63,52 +42,8 @@ class _AddToCardScreenState extends State<AddToCardScreen> {
     await prefs.setString('myItemsList', jsonString);
   }
 
-  void _addItemToList() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('myItemsList');
-    itemsList = jsonString != null
-        ? List<Map<String, dynamic>>.from(jsonDecode(jsonString))
-        : [];
-    // Add a new map item to the list
-    Map<String, dynamic> newItem = {
-      'itemPicture': widget.catagoryImages[0]['url'],
-      'itemName': widget.catagoryName,
-      'itemPrice': widget.catagoryPrice,
-      'itemId': widget.itemId,
-      'counterValue': counterValue,
-    };
-
-    int itemIndex = itemsList
-        .indexWhere((element) => element['itemId'] == newItem['itemId']);
-    if (itemIndex != -1) {
-      setState(() {
-        itemsList[itemIndex]['counterValue']++; // Increment the count by 1
-        int price = itemsList[itemIndex]['itemPrice'];
-        num updatedPrice = price + widget.catagoryPrice;
-        itemsList[itemIndex]['itemPrice'] = updatedPrice;
-      });
-    } else {
-      itemsList.add(newItem);
-    }
-    String updateJsonString = jsonEncode(itemsList);
-    await prefs.setString('myItemsList', updateJsonString);
-
-    // List<Map<String, dynamic>> itemsMergedListNew = List<Map<String, dynamic>>.from(itemsMergedList);
-    // itemsMergedListNew.add(newItem);
-
-    // itemsList.addAll(itemsMergedListNew);
-
-    // addToCartItems();
-    // setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
-    // print("lckbckba ${widget.getData}");
-    print("${widget.itemId}bbannnsdfkslldfbsdkbfxkkfbkdxbskbjdfb");
-    print("setting_items_pic ${widget.catagoryImages[0]['url']}");
-    print("setting_items_name ${widget.catagoryName}");
-    print("setting_items_price ${widget.catagoryPrice}");
     var size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppTheme.appColor,
