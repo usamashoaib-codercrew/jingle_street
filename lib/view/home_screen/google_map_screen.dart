@@ -731,6 +731,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                       width: MediaQuery.of(context).size.width),
                                 )),
                             SearchHashTag(
+                              user_id: user_id,
                               type: widget.type,
                               hashtagVisible: _hashtagVisible,
                               stream: _searchHashTagFinalResult,
@@ -1113,6 +1114,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                                   vType: marker['type'],
                                   id: marker["id"],
                                   lat: marker["latitude"] + 0.0,
+
                                   long: marker["longitude"] + 0.0,
                                   uType: marker["user_id"] == user_id ? 1 : 0,
                                   businessHours: marker["businesshours"] ??

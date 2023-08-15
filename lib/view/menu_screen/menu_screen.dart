@@ -175,6 +175,7 @@ class _VandorScreenState extends State<VandorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("bebjbjebrb${widget.reqType}");
     bool myBoolean = Provider.of<BoolProvider>(context).myBoolean;
     var size = MediaQuery.of(context).size;
 

@@ -334,7 +334,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         resData = responseData["data"];
         // print("object$resData");
         getVendorProfile();
-        setState(() {});
+        // setState(() {});
       }
     } catch (e, s) {
       print(e);
@@ -445,17 +445,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         final timerText =
                             timerProvider.getTimeString(resData[index]["id"]);
                         // print("134$timerText");
+                        if(timerText == "0:00"){
+                          denyRequest(index);
+                            // getNOtifications();
+                        }
                         return
                             //
                             timerText != "0:00"
                                 ? Center(
                                     child: AppText(
-                                      timerText,
+                                      timerText == "0:00" ? "" : timerText,
                                       size: 15,
                                       bold: FontWeight.bold,
                                       color: AppTheme.whiteColor,
                                     ),
                                   )
+                                // : SizedBox();
                                 : SizedBox();
                         // denyRequest(index);
                       },
@@ -1014,9 +1019,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
       } else if (response.statusCode == StatusCode.OK) {
         var resData = responseData;
         if (resData['status'] == true) {
-          setState(() {
+          // setState(() {
             getNOtifications();
-          });
+          // });
         }
       }
     } catch (e) {

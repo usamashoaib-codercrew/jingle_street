@@ -8,9 +8,10 @@ class SearchHashTag extends StatefulWidget {
   final type;
   final customerLat;
   final customerLong;
+  final user_id;
 
   const SearchHashTag(
-      {Key? key, required this.hashtagVisible, required this.stream, this.type,this.customerLat, this.customerLong})
+      {Key? key, required this.hashtagVisible, required this.stream, this.type,this.customerLat, this.customerLong,this.user_id})
       : super(key: key);
 
   @override
@@ -81,7 +82,10 @@ class _SearchHashTagState extends State<SearchHashTag> {
                                 id: vendor["id"],
                                 lat: vendor["latitude"] +0.0,
                                 long: vendor["longitude"] +0.0,
-                                uType: widget.type,
+                                uType: vendor["user_id"]== widget.user_id?1:0,
+                                busy: vendor["busy"],
+                                requested: vendor["requested"],
+                                reqType: widget.type,
                                 bio: vendor["bio"] ?? "bio is Not mentioned",
                                 customerLat: widget.customerLat,
                                 customerlong: widget.customerLong,

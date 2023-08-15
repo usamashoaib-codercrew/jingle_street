@@ -104,7 +104,7 @@ class _MapScreenState extends State<MapScreen> {
             },
             borderRadius: BorderRadius.circular(50),
             widthSearchBar: MediaQuery.of(context).size.width,
-            hintText: "Let's find local vendors!",
+            hintText: "Choose your Location",
             fontSize: 12,
             textEditingController: _searchController,
           ),
